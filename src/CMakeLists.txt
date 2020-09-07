@@ -1,0 +1,28 @@
+cmake_minimum_required(VERSION 2.6)
+project(Beam_algo)
+
+
+add_subdirectory(Beam_algo)
+
+list(APPEND BEAMFORMER_SOURCES
+  Beamformer.cpp
+  Beamformer.hpp
+  )
+
+list(APPEND BEAMFORMER_LINKS
+  AD5371_LIB
+  SIC_LIB
+  READER_COMM_LIB
+  BEAM_ALGO_LIB
+  )
+
+
+add_library(BEAMFORMER_LIB STATIC ${BEAMFORMER_SOURCES})
+target_link_libraries(BEAMFORMER_LIB ${BEAMFORMER_LINKS})
+
+
+list(APPEND BEAMFORMING_LIB_LIST
+  BEAMFORMER_LIB
+  )
+
+set(BEAMFORMING_LIB_LIST ${BEAMFORMING_LIB_LIST} PARENT_SCOPE)
