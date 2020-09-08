@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <complex>
+#include <memory>
+#include <utility>
 #include "struct_global.hpp"
 
 #define PI  (3.14159265358979323846)
@@ -29,5 +31,6 @@ class Beamtrainer{
     const bool isOptimalCalculated(void);
     const std::vector<int> getOptimalPhaseVector(void);
 };
+
 
 #endif

@@ -6,6 +6,8 @@ list(APPEND BEAM_SOURCES
   Beamtrainer.hpp
   Random_beamtrainer.cpp
   Random_beamtrainer.hpp
+  Beam_algorithm.cpp
+  Beam_algorithm.hpp
   )
 
 list(APPEND BEAM_LINKS

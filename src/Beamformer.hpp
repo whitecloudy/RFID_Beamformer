@@ -3,6 +3,7 @@
 
 #include "AD5371_ctrl/Controller_Global.h"
 #include "AD5371_ctrl/Phase_Attenuator_controller.hpp"
+#include "Beam_algo/Beam_algorithm.hpp"
 #include "Beam_algo/Beamtrainer.hpp"
 #include "Beam_algo/Random_beamtrainer.hpp"
 #include "SIC_ctrl/SIC_controller.hpp"
@@ -13,21 +14,21 @@
 #include <cstdio>
 #include <thread>
 #include <fstream>
-
-
-
+#include <memory>
 
 class Beamformer{
   private:
-    Phase_Attenuator_controller * phase_ctrl;
+    std::unique_ptr<Phase_Attenuator_controller> phase_ctrl;
+    std::unique_ptr<SIC_controller> sic_ctrl;
+    std::unique_ptr<Beamtrainer> BWtrainer;
+    
     IPC_controller ipc;
     std::ofstream log;
-    SIC_controller * sic_ctrl;
-    Random_beamtrainer * BWtrainer;
 
-    int ant_amount;
-    int * ant_nums;
-    int cur_weights[ANT_num] = {};
+    bool sic_enabled = false;
+    int ant_amount;   //TODO : this is actually not nessesary.... need to be depricated
+    std::vector<int> ant_nums;
+    int cur_weights[ANT_num] = {};  //TODO : change this more neet way
     
 
   private:
@@ -51,7 +52,7 @@ class Beamformer{
     int dataLogging(struct average_corr_data &);
 
   public:
-    Beamformer(Phase_Attenuator_controller * controller, int ant_amount, int * ant_num);
+    Beamformer(std::vector<int> ant_nums, BEAM_ALGO::algorithm beam_algo, int sic_ant_num);
     ~Beamformer();
     int start_beamformer(void);
 

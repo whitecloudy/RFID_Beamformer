@@ -46,7 +46,7 @@ int Beamformer::run_beamformer(void){
   memcpy(&data, buffer, sizeof(data));
   dataLogging(data);
 
-  sic_ctrl = new SIC_controller(std::complex<float>(data.cw_i, data.cw_q));
+  sic_ctrl = std::unique_ptr<SIC_controller>(new SIC_controller(std::complex<float>(data.cw_i, data.cw_q)));
   SIC_port_measure_over();
 
   //initial phase here
@@ -109,31 +109,34 @@ int Beamformer::run_beamformer(void){
 
 
 
-Beamformer::Beamformer(Phase_Attenuator_controller * controller_p, int ant_amount_p, int * ant_num_p){
-  this->phase_ctrl = controller_p;
-  this->ant_amount = ant_amount_p;
-  this->ant_nums = new int[this->ant_amount];
+Beamformer::Beamformer(std::vector<int> ant_nums_p, BEAM_ALGO::algorithm beam_algo, int sic_ant_num)
+{
+  this->phase_ctrl = std::unique_ptr<Phase_Attenuator_controller>(new Phase_Attenuator_controller(0));
+  this->ant_nums = ant_nums_p;
+  this->ant_amount = ant_nums.size();
+  this->BWtrainer = std::unique_ptr<Beamtrainer>(BEAM_ALGO::get_beam_class(ant_amount, beam_algo));
 
-  memcpy(ant_nums, ant_num_p, sizeof(int)*(this->ant_amount));
+  if(sic_ant_num != -1){
+    sic_enabled = true;
+    this->ant_nums.push_back(sic_ant_num); //TODO : SIC antenna shall be handled seperately
+  }
 
   log.open("log.csv");
   for(int i = 0; i<ant_amount; i++){
     log<<"phase "<<ant_nums[i]<<", ";
   }
-  log<<"avg corr,corr i, corr q, cw i, cw q,std i,std q ,RN16, round"<<std::endl;
+  log<<"SIC phase, avg corr,corr i, corr q, cw i, cw q,std i,std q ,RN16, round"<<std::endl;
 
+  this->ant_amount++;
 }
 
 
 
 Beamformer::~Beamformer(){
-  delete this->ant_nums;
   log.close();
 }
 
 int Beamformer::init_beamformer(void){
-  BWtrainer = new Random_beamtrainer(ant_amount-1);
-
   std::vector<int> weightVector = BWtrainer->startTraining();
   vector2cur_weights(weightVector);
   for(int i = 0; i<ant_amount-1; i++){
