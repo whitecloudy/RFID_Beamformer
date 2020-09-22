@@ -3,6 +3,7 @@
 
 #include "Beam_algo/Beamtrainer.hpp"
 #include "Beam_algo/Random_beamtrainer.hpp"
+#include "Beam_algo/Directional_beamtrainer.hpp"
 
 
 namespace BEAM_ALGO
@@ -11,6 +12,7 @@ namespace BEAM_ALGO
   {
     NO_ALGO_SELECTED,
     FIXED_BEAM,
+    DIRECTIONAL_BEAM,
     RANDOM_BEAM
   };
 

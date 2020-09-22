@@ -8,6 +8,8 @@
 #include "struct_global.hpp"
 
 #define PI  (3.14159265358979323846)
+#define Deg2Rad(_num) (float)(_num * (PI / 180))
+#define Rad2Deg(_num) (float)(_num / PI * 180.0)
 
 class Beamtrainer{
   protected:
@@ -18,7 +20,8 @@ class Beamtrainer{
   protected:
     static float complex2Phase(std::complex<float> complexData);
     static std::complex<float> phase2NormalComplex(float phaseData);
-    static std::vector<int> genRandomWeight(void);
+    
+    std::vector<int> genRandomWeight(void);
 
   public:
     virtual const std::vector<int> getRespond(struct average_corr_data recvData) = 0;

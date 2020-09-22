@@ -25,6 +25,25 @@ float Beamtrainer::complex2Phase(std::complex<float> complexData){
   return phase_before_process;
 }
 
+/*
+ *
+ * Generate Random Weight
+ *
+ * <rt> Generated random weight vector
+ *
+ */
+
+std::vector<int> Beamtrainer::genRandomWeight(void){
+  //set vector for phase shift
+  std::vector<int> weightVector(ant_num);
+  for(int i = 0; i < ant_num; i++){
+    int phase = (rand()%1440)/4;
+    weightVector[i] = phase;
+  }
+
+  return weightVector;
+}
+
 
 /*
  * get normalized complex number corresponding to phase(in degree)
@@ -44,14 +63,7 @@ std::complex<float> Beamtrainer::phase2NormalComplex(float phaseData){
  * Set New RandomWeight on the last matrix row
  */
 const std::vector<int> Beamtrainer::getRandomWeight(void){
-  //set vector for phase shift
-  std::vector<int> weightVector(ant_num);
-  for(int i = 0; i < ant_num; i++){
-    int phase = (rand()%1440)/4;
-    weightVector[i] = phase;
-  }
-
-  return weightVector;
+  return genRandomWeight();
 }
 
 /*

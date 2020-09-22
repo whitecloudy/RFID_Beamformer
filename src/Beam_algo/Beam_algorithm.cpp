@@ -1,4 +1,5 @@
 #include "Beam_algo/Beam_algorithm.hpp"
+#include <iostream>
 
 namespace BEAM_ALGO
 {
@@ -12,11 +13,14 @@ namespace BEAM_ALGO
       case RANDOM_BEAM:
         class_ptr = new Random_beamtrainer(ant_num);
         break;
+      case DIRECTIONAL_BEAM:
+        class_ptr = new Directional_beamtrainer(ant_num);
+        break;
       case FIXED_BEAM:
         //TBD
-        break;
       default:
-        //TBD
+        std::cerr << "Warning: No Algorithm selected" << std::endl;
+        class_ptr = NULL;
         break;
     }
 
@@ -29,6 +33,8 @@ namespace BEAM_ALGO
     algorithm algo;
     if(input.compare("random"))
       algo = RANDOM_BEAM;
+    else if(input.compare("directional"))
+      algo = DIRECTIONAL_BEAM;
     else if(input.compare("fixed"))
       algo = FIXED_BEAM;
     else{
