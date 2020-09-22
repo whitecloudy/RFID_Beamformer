@@ -10,27 +10,35 @@ Random_beamtrainer::Random_beamtrainer(int ant_num) : Beamtrainer(ant_num){
   avgCorrColumn.set_size(ant_num);
 }
 
+void Random_beamtrainer::printClassName(void){
+  std::cout<<"Random Beamtrainer Selected!"<< std::endl;
+}
+
 const std::vector<int> Random_beamtrainer::startTraining(void){
   //reset all the values
   training_count = 0;
   randomWeightMatrix.reset();
   isTraining = true;
 
-  return getRandomWeight();
+  curPhaseVector = getRandomWeight();
+
+  return curPhaseVector;
 }
 
 /*
  *  Handle the tag's respond
  */
 const std::vector<int> Random_beamtrainer::getRespond(struct average_corr_data recvData){
-  return getRandomWeight();
+  curPhaseVector = getRandomWeight();
+
+  return curPhaseVector;
 }
 
 /*
  * Handle when the tag does not respond
  */
 const std::vector<int> Random_beamtrainer::cannotGetRespond(void){
-  return getRandomWeight();
+  curPhaseVector = getRandomWeight();
+
+  return curPhaseVector;
 }
-
-

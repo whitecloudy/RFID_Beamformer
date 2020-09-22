@@ -22,9 +22,15 @@ int parse_arg(int argc, char ** argv){
     ("a,ant", "antenna number", cxxopts::value<std::vector<int>>())
     ("s,sic", "Self-interference Cancellation",cxxopts::value<int>()->default_value("-1"))
     ("A,algo", "Beamforming Algorithm", cxxopts::value<std::string>())
+    ("h,help", "Print usage")
     ;
 
   auto opt_result = options.parse(argc,argv);
+
+  if(opt_result.count("help")){
+    std::cout << options.help() << std::endl;
+    exit(0);
+  }
 
   args.debug       = opt_result["d"].as<bool>();
   args.sic_ant_num = opt_result["s"].as<int>();

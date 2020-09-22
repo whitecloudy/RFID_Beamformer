@@ -8,7 +8,7 @@
 //#define __TIME_STAMP__
 
 #define PREDEFINED_RN16_ (0xAAAA)
-#define EXPECTED_TAG_NUM_ (3)
+#define EXPECTED_TAG_NUM_ (1)
 
 #define SIC_PORT_NUM_ ant_nums[ant_amount-1]
 
@@ -115,6 +115,8 @@ Beamformer::Beamformer(std::vector<int> ant_nums_p, BEAM_ALGO::algorithm beam_al
   this->ant_nums = ant_nums_p;
   this->ant_amount = ant_nums.size();
   this->BWtrainer = std::unique_ptr<Beamtrainer>(BEAM_ALGO::get_beam_class(ant_amount, beam_algo));
+
+  this->BWtrainer->printClassName();
 
   if(sic_ant_num != -1){
     sic_enabled = true;

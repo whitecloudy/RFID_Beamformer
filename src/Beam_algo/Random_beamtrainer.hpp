@@ -22,6 +22,8 @@ class Random_beamtrainer : public Beamtrainer{
 
     const std::vector<int> getRespond(struct average_corr_data recvData);
     const std::vector<int> cannotGetRespond(void);
+
+    void printClassName(void);
 };
 
 #endif

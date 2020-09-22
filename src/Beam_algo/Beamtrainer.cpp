@@ -4,11 +4,15 @@
 #include <ctime>
 
 
+
+std::vector<int> Beamtrainer::curPhaseVector;
+
 Beamtrainer::Beamtrainer(int ant_num){
   this->ant_num = ant_num;
   srand(time(NULL));
 
   optimalPhaseVector.resize(ant_num);
+  curPhaseVector.resize(ant_num);
 }
 
 /*
@@ -76,4 +80,8 @@ const bool Beamtrainer::isOptimalCalculated(void){
 
 const std::vector<int> Beamtrainer::getOptimalPhaseVector(void){
   return optimalPhaseVector;
+}
+
+const std::vector<int> Beamtrainer::getCurPhaseVector(void){
+  return curPhaseVector;
 }

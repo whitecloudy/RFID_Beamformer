@@ -5,7 +5,9 @@
 #include <complex>
 #include <memory>
 #include <utility>
+#include <iostream>
 #include "struct_global.hpp"
+
 
 #define PI  (3.14159265358979323846)
 #define Deg2Rad(_num) (float)(_num * (PI / 180))
@@ -16,6 +18,7 @@ class Beamtrainer{
     int ant_num;
     bool isTraining = false;
     std::vector<int> optimalPhaseVector;
+    static std::vector<int> curPhaseVector;
 
   protected:
     static float complex2Phase(std::complex<float> complexData);
@@ -28,12 +31,17 @@ class Beamtrainer{
     virtual const std::vector<int> cannotGetRespond(void) = 0;
     virtual const std::vector<int> startTraining(void) = 0;
 
+    virtual void printClassName(void) = 0;
+
   public:
     Beamtrainer(int ant_num);
     const std::vector<int> getRandomWeight(void);
     const bool isOptimalCalculated(void);
     const std::vector<int> getOptimalPhaseVector(void);
+    const std::vector<int> getCurPhaseVector(void);
+
 };
+
 
 
 #endif

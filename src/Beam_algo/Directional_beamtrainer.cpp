@@ -7,28 +7,27 @@
 #define __BEAM_ANGLE_STEP   (15)
 
 Directional_beamtrainer::Directional_beamtrainer(int ant_num) : Beamtrainer(ant_num){
-  avgCorrColumn.set_size(ant_num);
+}
+
+void Directional_beamtrainer::printClassName(void){
+  std::cout << "Directional_beamtrainer Selected!!"<<std::endl;
 }
 
 const std::vector<int> Directional_beamtrainer::startTraining(void){
   //reset all the values
   current_angle = -__BEAM_ANGLE_RANGE;
-  randomWeightMatrix.reset();
   isTraining = true;
 
-  return getDirectional(current_angle);
+  curPhaseVector = getDirectional(current_angle);
+
+  return curPhaseVector;
 }
 
 /*
  *  Handle the tag's respond
  */
 const std::vector<int> Directional_beamtrainer::getRespond(struct average_corr_data recvData){
-  current_angle += __BEAM_ANGLE_STEP;
-  if(current_angle > __BEAM_ANGLE_RANGE){
-    current_angle = -__BEAM_ANGLE_RANGE;
-  }
-
-  return getDirectional(current_angle);
+  return cannotGetRespond();
 }
 
 /*
@@ -40,7 +39,9 @@ const std::vector<int> Directional_beamtrainer::cannotGetRespond(void){
     current_angle = -__BEAM_ANGLE_RANGE;
   }
 
-  return getDirectional(current_angle);
+  curPhaseVector = getDirectional(current_angle);
+
+  return curPhaseVector;
 }
 
 
@@ -49,7 +50,6 @@ const std::vector<int> Directional_beamtrainer::cannotGetRespond(void){
  * 
  * This is only valid when the antennas are aligned in 1/2 lambda
  */
-
 std::vector<int> Directional_beamtrainer::getDirectional(float angle){ 
   std::vector<int> weightVector(ant_num); 
   std::complex<float> complexAngle(1,0); 

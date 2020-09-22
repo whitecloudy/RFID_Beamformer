@@ -6,15 +6,10 @@
 #include <armadillo>
 
 class Directional_beamtrainer : public Beamtrainer{
-  private:
+  protected:
     int current_angle;
 
-    arma::Mat<std::complex<float>> randomWeightMatrix;
-    arma::Mat<std::complex<float>> invMatrix;
-
-    arma::Col<std::complex<float>> avgCorrColumn;
-
-  private:
+  protected:
     std::vector<int> getDirectional(float angle);
 
 
@@ -25,6 +20,8 @@ class Directional_beamtrainer : public Beamtrainer{
 
     const std::vector<int> getRespond(struct average_corr_data recvData);
     const std::vector<int> cannotGetRespond(void);
+
+    void printClassName(void);
 };
 
 #endif
