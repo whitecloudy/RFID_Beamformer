@@ -1,8 +1,10 @@
 #include <iostream>
-#include "AD5371_ctrl/Phase_Attenuator_controller.hpp"
+#include "lib/AD5371_ctrl/Phase_Attenuator_controller.hpp"
+#include "lib/cxxopts/include/cxxopts.hpp"
+
+#include "global/struct_global.hpp"
+
 #include "Beam_algo/Beam_algorithm.hpp"
-#include "cxxopts/include/cxxopts.hpp"
-#include "struct_global.hpp"
 #include "Beamformer.hpp"
 #include <cstdlib>
 #include <ctime>

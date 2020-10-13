@@ -6,7 +6,7 @@
 #include <memory>
 #include <utility>
 #include <iostream>
-#include "struct_global.hpp"
+#include "global/struct_global.hpp"
 
 
 #define PI  (3.14159265358979323846)

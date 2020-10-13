@@ -1,14 +1,14 @@
 #ifndef __BEAMFORMER__
 #define __BEAMFORMER__
 
-#include "AD5371_ctrl/Controller_Global.h"
-#include "AD5371_ctrl/Phase_Attenuator_controller.hpp"
+#include "lib/AD5371_ctrl/Controller_Global.h"
+#include "lib/AD5371_ctrl/Phase_Attenuator_controller.hpp"
 #include "Beam_algo/Beam_algorithm.hpp"
 #include "Beam_algo/Beamtrainer.hpp"
-#include "Beam_algo/Random_beamtrainer.hpp"
-#include "SIC/SIC_controller.hpp"
-#include "Reader_comm/IPC_controller.hpp"
-#include "struct_global.hpp"
+//#include "Beam_algo/Random_beamtrainer.hpp"
+#include "lib/SIC/SIC_controller.hpp"
+#include "lib/Reader_comm/IPC_controller.hpp"
+#include "global/struct_global.hpp"
 #include <iostream>
 #include <string>
 #include <cstdio>

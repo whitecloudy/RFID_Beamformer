@@ -1,7 +1,7 @@
 #ifndef __BEAM_ALGORITHM__
 #define __BEAM_ALGORITHM__
 
-#include "Beam_algo/Beamtrainer.hpp"
+#include "Beamtrainer.hpp"
 
 
 

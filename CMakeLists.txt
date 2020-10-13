@@ -1,13 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
 
-include_directories(${PROJECT_SOURCE_DIR}/lib)
-include_directories(${PROJECT_BINARY_DIR}/lib)
+include_directories(${PROJECT_SOURCE_DIR})
+include_directories(${PROJECT_BINARY_DIR})
 
 include_directories(${PROJECT_SOURCE_DIR}/src)
 include_directories(${PROJECT_BINARY_DIR}/src)
-
-include_directories(${PROJECT_SOURCE_DIR}/global)
-include_directories(${PROJECT_BINARY_DIR}/global)
 
 list(APPEND BEAMFORMING_LIB_LIST
   beamforming
