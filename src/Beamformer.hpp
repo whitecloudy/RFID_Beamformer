@@ -6,7 +6,7 @@
 #include "Beam_algo/Beam_algorithm.hpp"
 #include "Beam_algo/Beamtrainer.hpp"
 #include "Beam_algo/Random_beamtrainer.hpp"
-#include "SIC_ctrl/SIC_controller.hpp"
+#include "SIC/SIC_controller.hpp"
 #include "Reader_comm/IPC_controller.hpp"
 #include "struct_global.hpp"
 #include <iostream>
