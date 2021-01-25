@@ -7,7 +7,7 @@
 #define __COLLECT_DATA__
 //#define __TIME_STAMP__
 
-#define PREDEFINED_RN16_ (0xAAAA)
+#define PREDEFINED_RN16_ (0x5555)
 #define EXPECTED_TAG_NUM_ (1)
 
 #define SIC_PORT_NUM_ ant_nums[ant_amount-1]
@@ -61,7 +61,6 @@ int Beamformer::run_beamformer(void){
     //loop until it is over
     while(1){
         /******************* SIC stage *******************/
-        std::cerr << "Data recv!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" <<std::endl;
         if(ipc.data_recv(buffer) == -1){
             std::cerr <<"Breaker is activated"<<std::endl;
             return 0;   
@@ -73,7 +72,6 @@ int Beamformer::run_beamformer(void){
         SIC_handler(data);    
 
         //send ack so that Gen2 program can recognize that the beamforming has been done
-        std::cerr << "ACK!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" <<std::endl;
         if(ipc.send_ack() == -1){
             return 0;
         }
@@ -84,7 +82,6 @@ int Beamformer::run_beamformer(void){
 
         /******************* Signal stage *****************/
         for(int tag_turn = 0; tag_turn<(EXPECTED_TAG_NUM_); tag_turn++){
-            std::cerr << "Data recv!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" <<std::endl;
             if(ipc.data_recv(buffer) == -1){
                 std::cerr <<"Breaker is activated"<<std::endl;
                 return 0;   
@@ -97,8 +94,6 @@ int Beamformer::run_beamformer(void){
                 Signal_handler(data);
 
             //send ack so that Gen2 program can recognize that the beamforming has been done
-            std::cerr << "ACK!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" <<std::endl;
-
             if(ipc.send_ack() == -1){
                 return 0;
             }
@@ -295,8 +290,6 @@ int Beamformer::Signal_handler(struct average_corr_data & data){
         vector2cur_weights(weightVector);
     }
 
-    sic_ctrl->setPower(-22.0);
-    phase_ctrl->phase_control(SIC_PORT_NUM_, -22.0, cur_weights[SIC_PORT_NUM_]); //change phase and power
     if(weights_apply(cur_weights)){
         std::cerr<<"weight apply failed"<<std::endl;
         return 1;

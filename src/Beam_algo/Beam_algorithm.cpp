@@ -3,6 +3,7 @@
 
 #include "Beam_algo/Random_beamtrainer.hpp"
 #include "Beam_algo/Directional_beamtrainer.hpp"
+#include "Beam_algo/Fixed_beamtrainer.hpp"
 #include "Beam_algo/CA_with_directional_beamtrainer.hpp"
 
 namespace BEAM_ALGO
@@ -24,7 +25,8 @@ namespace BEAM_ALGO
         class_ptr = new CA_with_directional_beamtrainer(ant_num);
         break;
       case FIXED_BEAM:
-        //TBD
+        class_ptr = new Fixed_beamtrainer(ant_num);
+        break;
       default:
         std::cerr << "Warning: No Algorithm selected" << std::endl;
         class_ptr = NULL;

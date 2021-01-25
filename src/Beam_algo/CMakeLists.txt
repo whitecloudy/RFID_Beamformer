@@ -12,6 +12,8 @@ list(APPEND BEAM_SOURCES
   CA_with_directional_beamtrainer.hpp
   Beam_algorithm.cpp
   Beam_algorithm.hpp
+  Fixed_beamtrainer.cpp
+  Fixed_beamtrainer.hpp
   )
 
 list(APPEND BEAM_LINKS
