@@ -61,7 +61,6 @@ int Beamformer::run_beamformer(void){
     //loop until it is over
     while(1){
         /******************* SIC stage *******************/
-        std::cerr << "Data recv!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" <<std::endl;
         if(ipc.data_recv(buffer) == -1){
             std::cerr <<"Breaker is activated"<<std::endl;
             return 0;   
@@ -73,7 +72,6 @@ int Beamformer::run_beamformer(void){
         SIC_handler(data);    
 
         //send ack so that Gen2 program can recognize that the beamforming has been done
-        std::cerr << "ACK!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" <<std::endl;
         if(ipc.send_ack() == -1){
             return 0;
         }
@@ -84,7 +82,6 @@ int Beamformer::run_beamformer(void){
 
         /******************* Signal stage *****************/
         for(int tag_turn = 0; tag_turn<(EXPECTED_TAG_NUM_); tag_turn++){
-            std::cerr << "Data recv!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" <<std::endl;
             if(ipc.data_recv(buffer) == -1){
                 std::cerr <<"Breaker is activated"<<std::endl;
                 return 0;   
@@ -97,7 +94,6 @@ int Beamformer::run_beamformer(void){
                 Signal_handler(data);
 
             //send ack so that Gen2 program can recognize that the beamforming has been done
-            std::cerr << "ACK!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" <<std::endl;
 
             if(ipc.send_ack() == -1){
                 return 0;
