@@ -7,7 +7,7 @@
 #define __COLLECT_DATA__
 //#define __TIME_STAMP__
 
-#define PREDEFINED_RN16_ (0xAAAA)
+#define PREDEFINED_RN16_ (0x5555)
 #define EXPECTED_TAG_NUM_ (1)
 
 #define SIC_PORT_NUM_ ant_nums[ant_amount-1]
@@ -94,7 +94,6 @@ int Beamformer::run_beamformer(void){
                 Signal_handler(data);
 
             //send ack so that Gen2 program can recognize that the beamforming has been done
-
             if(ipc.send_ack() == -1){
                 return 0;
             }
@@ -291,8 +290,6 @@ int Beamformer::Signal_handler(struct average_corr_data & data){
         vector2cur_weights(weightVector);
     }
 
-    sic_ctrl->setPower(-22.0);
-    phase_ctrl->phase_control(SIC_PORT_NUM_, -22.0, cur_weights[SIC_PORT_NUM_]); //change phase and power
     if(weights_apply(cur_weights)){
         std::cerr<<"weight apply failed"<<std::endl;
         return 1;
