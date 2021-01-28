@@ -67,10 +67,10 @@ const std::vector<int> CA_with_directional_beamtrainer::cannotGetRespond(void){
  * Scramble the phase vector with random phase
  *
  */
-std::vector<int> CA_with_directional_beamtrainer::randomScramble(std::vector<int> center, float std){
+std::vector<int> CA_with_directional_beamtrainer::randomScramble(std::vector<int> center, double std){
   static std::default_random_engine random_gen;
   
-  std::normal_distribution<float> normal_random(0, std);
+  std::normal_distribution<double> normal_random(0, std);
 
   for(int idx = 0; idx < center.size(); idx++){
     center[idx] += normal_random(random_gen);

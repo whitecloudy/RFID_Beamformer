@@ -1,4 +1,4 @@
-#include "Beam_algo/CA_with_random_beamtrainer.hpp"
+#include "Beam_algo/CA_kalmaned_with_random_beamtrainer.hpp"
 #include <cmath>
 #include <cstdlib>
 #include <ctime>
@@ -6,15 +6,17 @@
 #define BaseNum (32)
 #define PI  (3.14159265358979323846)
 
-CA_with_random_beamtrainer::CA_with_random_beamtrainer(int ant_num) : Beamtrainer(ant_num){
+CA_kalmaned_with_random_beamtrainer::CA_kalmaned_with_random_beamtrainer(int ant_num) 
+  : Beamtrainer(ant_num)
+{
 }
 
-void CA_with_random_beamtrainer::printClassName(void){
-  std::cout<<"CA_with_random Beamtrainer Selected!"<< std::endl;
+void CA_kalmaned_with_random_beamtrainer::printClassName(void){
+  std::cout<<"CA_kalmaned_with_random Beamtrainer Selected!"<< std::endl;
 }
 
 
-int CA_with_random_beamtrainer::setNewTrainingVector(std::vector<int> trainingVector)
+int CA_kalmaned_with_random_beamtrainer::setNewTrainingVector(std::vector<int> trainingVector)
 {
   arma::Row<std::complex<double>> beamWeight(ant_num);
 
@@ -40,7 +42,7 @@ int CA_with_random_beamtrainer::setNewTrainingVector(std::vector<int> trainingVe
 }
 
 
-int CA_with_random_beamtrainer::setNewCorrData(std::complex<double> corrData)
+int CA_kalmaned_with_random_beamtrainer::setNewCorrData(std::complex<double> corrData)
 {
   std::cout << "setNew corr data"<<std::endl;
   arma::Row<std::complex<double>> data(1);
@@ -63,7 +65,7 @@ int CA_with_random_beamtrainer::setNewCorrData(std::complex<double> corrData)
 }
 
 
-int CA_with_random_beamtrainer::resetTrainingVector(std::vector<int> trainingVector)
+int CA_kalmaned_with_random_beamtrainer::resetTrainingVector(std::vector<int> trainingVector)
 {
   arma::Row<std::complex<double>> beamWeight(ant_num);
 
@@ -86,7 +88,7 @@ int CA_with_random_beamtrainer::resetTrainingVector(std::vector<int> trainingVec
 }
 
 
-int CA_with_random_beamtrainer::resetCorrData(std::complex<double> corrData)
+int CA_kalmaned_with_random_beamtrainer::resetCorrData(std::complex<double> corrData)
 {
   arma::Row<std::complex<double>> data(1);
   data(0) = corrData;
@@ -104,18 +106,36 @@ int CA_with_random_beamtrainer::resetCorrData(std::complex<double> corrData)
   return avgCorrColumn.n_rows;
 }
 
-std::vector<int> CA_with_random_beamtrainer::processOptimalVector(void)
+std::vector<int> CA_kalmaned_with_random_beamtrainer::processOptimalVector(void)
 {
   std::vector<int> phaseVector(ant_num);
 
   //Check current state is processable
   if(is_processable())
   {
-    arma::Col<std::complex<double>> channelMatrix = arma::inv(trainingWeightMatrix) * avgCorrColumn;
+    arma::Mat<std::complex<double>> channelMatrix;
+    if(filter == NULL){
+      channelMatrix = arma::inv(trainingWeightMatrix) * avgCorrColumn;
+
+      arma::cx_mat   P_0(ant_num, ant_num, arma::fill::eye);
+      arma::cx_mat   Q(ant_num, ant_num, arma::fill::eye);
+      arma::cx_mat   R   = 0.1 * arma::cx_mat(ant_num, 1, arma::fill::ones);
+
+
+      filter = new Kalman_filter(ant_num, 
+                                channelMatrix, 
+                                P_0, 
+                                Q,
+                                R);
+    }else
+    {
+      channelMatrix = filter->process(avgCorrColumn, arma::inv(trainingWeightMatrix), arma::cx_mat(ant_num, ant_num, arma::fill::eye));
+    }
 
     for (int i = 0; i < ant_num; i++){
       phaseVector[i] = complex2Phase(std::conj(channelMatrix(i)));
     }
+
 
   }else
   {
@@ -126,13 +146,13 @@ std::vector<int> CA_with_random_beamtrainer::processOptimalVector(void)
   return phaseVector;
 }
 
-bool CA_with_random_beamtrainer::is_processable(void)
+bool CA_kalmaned_with_random_beamtrainer::is_processable(void)
 {
   return (trainingWeightMatrix.is_square() && (trainingWeightMatrix.n_rows == avgCorrColumn.n_rows));
 }
 
 
-const std::vector<int> CA_with_random_beamtrainer::startTraining(void){
+const std::vector<int> CA_kalmaned_with_random_beamtrainer::startTraining(void){
   //reset all the values
   training_count = 0;
   trainingWeightMatrix.reset();
@@ -148,7 +168,7 @@ const std::vector<int> CA_with_random_beamtrainer::startTraining(void){
 /*
  *  Handle the tag's respond
  */
-const std::vector<int> CA_with_random_beamtrainer::getRespond(struct average_corr_data recvData){
+const std::vector<int> CA_kalmaned_with_random_beamtrainer::getRespond(struct average_corr_data recvData){
   std::complex<double> corrData(recvData.avg_i, recvData.avg_q);
 
   if(optimal_used)
@@ -177,7 +197,7 @@ const std::vector<int> CA_with_random_beamtrainer::getRespond(struct average_cor
 /*
  * Handle when the tag does not respond
  */
-const std::vector<int> CA_with_random_beamtrainer::cannotGetRespond(void){
+const std::vector<int> CA_kalmaned_with_random_beamtrainer::cannotGetRespond(void){
   optimal_used = false;
   curPhaseVector = getRandomWeight();
   resetTrainingVector(curPhaseVector);

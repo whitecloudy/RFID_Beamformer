@@ -50,10 +50,10 @@ const std::vector<int> Directional_beamtrainer::cannotGetRespond(void){
  * 
  * This is only valid when the antennas are aligned in 1/2 lambda
  */
-std::vector<int> Directional_beamtrainer::getDirectional(float angle){ 
+std::vector<int> Directional_beamtrainer::getDirectional(double angle){ 
   std::vector<int> weightVector(ant_num); 
-  std::complex<float> complexAngle(1,0); 
-  std::complex<float> stepAngle = phase2NormalComplex(180.0 * std::sin(Deg2Rad(angle))); 
+  std::complex<double> complexAngle(1,0); 
+  std::complex<double> stepAngle = phase2NormalComplex(180.0 * std::sin(Deg2Rad(angle))); 
 
   for(int i = 0; i< ant_num; i++){ 
     weightVector[i] = complex2Phase(complexAngle); 

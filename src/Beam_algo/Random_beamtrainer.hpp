@@ -9,10 +9,10 @@ class Random_beamtrainer : public Beamtrainer{
   private:
     int training_count = 0;
 
-    arma::Mat<std::complex<float>> randomWeightMatrix;
-    arma::Mat<std::complex<float>> invMatrix;
+    arma::Mat<std::complex<double>> randomWeightMatrix;
+    arma::Mat<std::complex<double>> invMatrix;
 
-    arma::Col<std::complex<float>> avgCorrColumn;
+    arma::Col<std::complex<double>> avgCorrColumn;
 
 
   public:

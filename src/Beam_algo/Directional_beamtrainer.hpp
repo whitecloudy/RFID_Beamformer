@@ -10,7 +10,7 @@ class Directional_beamtrainer : public Beamtrainer{
     int current_angle;
 
   protected:
-    std::vector<int> getDirectional(float angle);
+    std::vector<int> getDirectional(double angle);
 
 
   public:

@@ -22,8 +22,8 @@ Beamtrainer::Beamtrainer(int ant_num){
  *
  * <rt> Phase vlaue in degree which is correspond to complex data
  */
-float Beamtrainer::complex2Phase(std::complex<float> complexData){
-  float phase_before_process = (std::arg(complexData)/PI) * 180;
+double Beamtrainer::complex2Phase(std::complex<double> complexData){
+  double phase_before_process = (std::arg(complexData)/PI) * 180;
   if(phase_before_process < 0)
     phase_before_process+=360;
   return phase_before_process;
@@ -56,8 +56,8 @@ std::vector<int> Beamtrainer::genRandomWeight(void){
  *
  * <rt> Normalized complex value which is correspond to phase
  */
-std::complex<float> Beamtrainer::phase2NormalComplex(float phaseData){
-  return std::polar((float)1.0, (float)(phaseData*PI)/180);
+std::complex<double> Beamtrainer::phase2NormalComplex(double phaseData){
+  return std::polar((double)1.0, (double)(phaseData*PI)/180);
 }
 
 

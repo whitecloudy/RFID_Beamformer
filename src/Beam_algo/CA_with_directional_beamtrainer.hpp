@@ -16,7 +16,7 @@ class CA_with_directional_beamtrainer : public Directional_beamtrainer{
     std::vector<int> curCenterPhaseVector;
 
   private:
-    std::vector<int> randomScramble(std::vector<int> center, float std);
+    std::vector<int> randomScramble(std::vector<int> center, double std);
 
   public:
     CA_with_directional_beamtrainer(int ant_num, int round_max=5);

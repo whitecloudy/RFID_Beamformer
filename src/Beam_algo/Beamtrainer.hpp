@@ -10,8 +10,8 @@
 
 
 #define PI  (3.14159265358979323846)
-#define Deg2Rad(_num) (float)(_num * (PI / 180))
-#define Rad2Deg(_num) (float)(_num / PI * 180.0)
+#define Deg2Rad(_num) (double)(_num * (PI / 180))
+#define Rad2Deg(_num) (double)(_num / PI * 180.0)
 
 class Beamtrainer{
   protected:
@@ -23,8 +23,8 @@ class Beamtrainer{
     static std::vector<int> curPhaseVector;
 
   protected:
-    static float complex2Phase(std::complex<float> complexData);
-    static std::complex<float> phase2NormalComplex(float phaseData);
+    static double complex2Phase(std::complex<double> complexData);
+    static std::complex<double> phase2NormalComplex(double phaseData);
     
     std::vector<int> genRandomWeight(void);
 

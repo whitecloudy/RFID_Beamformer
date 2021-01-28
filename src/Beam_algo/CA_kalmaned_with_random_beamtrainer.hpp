@@ -1,13 +1,15 @@
-#ifndef _CA_with_RANDOM_BEAMTRAINER_
-#define _CA_with_RANDOM_BEAMTRAINER_
+#ifndef _CA_kalmaned_with_RANDOM_BEAMTRAINER_
+#define _CA_kalmaned_with_RANDOM_BEAMTRAINER_
 
 #include <iostream>
 #include "Beam_algo/Beamtrainer.hpp"
+#include <lib/kalman_filter/Kalman_filter.hpp>
 #include <armadillo>
 
-class CA_with_random_beamtrainer : public Beamtrainer{
+class CA_kalmaned_with_random_beamtrainer : public Beamtrainer{
   private:
     int training_count = 0;
+    Kalman_filter * filter = NULL;
 
     arma::Mat<std::complex<double>> trainingWeightMatrix;
     arma::Mat<std::complex<double>> invMatrix;
@@ -24,7 +26,7 @@ class CA_with_random_beamtrainer : public Beamtrainer{
     std::vector<int> processOptimalVector(void);
 
   public:
-    CA_with_random_beamtrainer(int ant_num);
+    CA_kalmaned_with_random_beamtrainer(int ant_num);
 
     const std::vector<int> startTraining(void);
 
