@@ -77,6 +77,13 @@ const bool Beamtrainer::isOptimalCalculated(void){
   return !optimalPhaseVector.empty();
 }
 
+/*
+ * Tell that the optimal Phase Vector is Used
+ */
+const bool Beamtrainer::isOptimalUsed(void){
+  return optimal_used;
+}
+
 
 const std::vector<int> Beamtrainer::getOptimalPhaseVector(void){
   return optimalPhaseVector;

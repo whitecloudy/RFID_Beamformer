@@ -23,7 +23,7 @@ class Beamformer{
     std::unique_ptr<Beamtrainer> BWtrainer;
     
     IPC_controller ipc;
-    std::ofstream log;
+    std::ofstream log, optimal_log;
 
     bool sic_enabled = false;
     int ant_amount;   //TODO : this is actually not nessesary.... need to be depricated
@@ -49,7 +49,7 @@ class Beamformer{
     int SIC_port_measure_over(void);
     int SIC_handler(struct average_corr_data &);
     int Signal_handler(struct average_corr_data &);
-    int dataLogging(struct average_corr_data &);
+    int dataLogging(struct average_corr_data &, bool optimal=false);
 
   public:
     Beamformer(std::vector<int> ant_nums, BEAM_ALGO::algorithm beam_algo, int sic_ant_num);

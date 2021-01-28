@@ -1,4 +1,4 @@
-#ifndef _CA_DIRECTIONAL_BEAMTRAINER_
+#ifndef _CA_with_DIRECTIONAL_BEAMTRAINER_
 #define _CA_with_DIRECTIONAL_BEAMTRAINER_
 
 #include <iostream>

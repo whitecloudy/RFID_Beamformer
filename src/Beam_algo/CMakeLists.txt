@@ -10,6 +10,10 @@ list(APPEND BEAM_SOURCES
   Directional_beamtrainer.hpp
   CA_with_directional_beamtrainer.cpp
   CA_with_directional_beamtrainer.hpp
+  CA_with_random_beamtrainer.cpp
+  CA_with_random_beamtrainer.hpp
+  Agent_beamtrainer.cpp
+  Agent_beamtrainer.hpp
   Beam_algorithm.cpp
   Beam_algorithm.hpp
   Fixed_beamtrainer.cpp

@@ -5,6 +5,8 @@
 #include "Beam_algo/Directional_beamtrainer.hpp"
 #include "Beam_algo/Fixed_beamtrainer.hpp"
 #include "Beam_algo/CA_with_directional_beamtrainer.hpp"
+#include "Beam_algo/Agent_beamtrainer.hpp"
+#include "Beam_algo/CA_with_random_beamtrainer.hpp"
 
 namespace BEAM_ALGO
 {
@@ -24,8 +26,14 @@ namespace BEAM_ALGO
       case CA_WITH_DIRECTIONAL:
         class_ptr = new CA_with_directional_beamtrainer(ant_num);
         break;
+      case CA_WITH_RANDOM:
+        class_ptr = new CA_with_random_beamtrainer(ant_num);
+        break;
       case FIXED_BEAM:
         class_ptr = new Fixed_beamtrainer(ant_num);
+        break;
+      case AGENT:
+        class_ptr = new Agent_beamtrainer(ant_num);
         break;
       default:
         std::cerr << "Warning: No Algorithm selected" << std::endl;
@@ -44,6 +52,8 @@ namespace BEAM_ALGO
     else if(!input.compare("directional"))          algo = DIRECTIONAL_BEAM;
     else if(!input.compare("fixed"))                algo = FIXED_BEAM;
     else if(!input.compare("ca_with_directional"))  algo = CA_WITH_DIRECTIONAL;
+    else if(!input.compare("ca_with_random"))       algo = CA_WITH_RANDOM;
+    else if(!input.compare("agent"))                algo = AGENT;
     else{
       std::cerr<<"Error : No such algorithm"<<std::endl;
       exit(1);
@@ -51,6 +61,7 @@ namespace BEAM_ALGO
 
     return algo;
   }
+
 }
 
 

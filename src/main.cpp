@@ -1,6 +1,6 @@
 #include <iostream>
-#include "lib/AD5371_ctrl/Phase_Attenuator_controller.hpp"
-#include "lib/cxxopts/include/cxxopts.hpp"
+#include <lib/AD5371_ctrl/Phase_Attenuator_controller.hpp>
+#include <lib/cxxopts/include/cxxopts.hpp>
 
 #include "global/struct_global.hpp"
 
