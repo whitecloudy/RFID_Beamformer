@@ -1,4 +1,4 @@
-#include "CA_with_random_beamtrainer.hpp"
+#include "Beam_algo/Kalmaned_with_random_beamtrainer.hpp"
 #include <cmath>
 #include <cstdlib>
 #include <ctime>
@@ -6,16 +6,17 @@
 #define BaseNum (32)
 #define PI  (3.14159265358979323846)
 
-CA_with_random_beamtrainer::CA_with_random_beamtrainer(int ant_num) : Beamtrainer(ant_num), ca_cal(ant_num){
+Kalmaned_with_random_beamtrainer::Kalmaned_with_random_beamtrainer(int ant_num) 
+  : Beamtrainer(ant_num), ca_cal(ant_num)
+{
 }
 
-void CA_with_random_beamtrainer::printClassName(void){
-  std::cout<<"CA_with_random Beamtrainer Selected!"<< std::endl;
+void Kalmaned_with_random_beamtrainer::printClassName(void){
+  std::cout<<"Kalmaned_with_random Beamtrainer Selected!"<< std::endl;
 }
 
 
-
-const std::vector<int> CA_with_random_beamtrainer::startTraining(void){
+const std::vector<int> Kalmaned_with_random_beamtrainer::startTraining(void){
   //reset all the values
   training_count = 0;
   ca_cal.clear();
@@ -31,7 +32,7 @@ const std::vector<int> CA_with_random_beamtrainer::startTraining(void){
 /*
  *  Handle the tag's respond
  */
-const std::vector<int> CA_with_random_beamtrainer::getRespond(struct average_corr_data recvData){
+const std::vector<int> Kalmaned_with_random_beamtrainer::getRespond(struct average_corr_data recvData){
   std::complex<double> corrData(recvData.avg_i, recvData.avg_q);
 
   if(optimal_used)
@@ -60,7 +61,7 @@ const std::vector<int> CA_with_random_beamtrainer::getRespond(struct average_cor
 /*
  * Handle when the tag does not respond
  */
-const std::vector<int> CA_with_random_beamtrainer::cannotGetRespond(void){
+const std::vector<int> Kalmaned_with_random_beamtrainer::cannotGetRespond(void){
   optimal_used = false;
   curPhaseVector = getRandomWeight();
   ca_cal.resetTrainingVector(curPhaseVector);

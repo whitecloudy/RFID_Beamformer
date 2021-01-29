@@ -53,10 +53,10 @@ const std::vector<int> Directional_beamtrainer::cannotGetRespond(void){
 std::vector<int> Directional_beamtrainer::getDirectional(double angle){ 
   std::vector<int> weightVector(ant_num); 
   std::complex<double> complexAngle(1,0); 
-  std::complex<double> stepAngle = phase2NormalComplex(180.0 * std::sin(Deg2Rad(angle))); 
+  std::complex<double> stepAngle = beam_util::phase2NormalComplex(180.0 * std::sin(Deg2Rad(angle))); 
 
   for(int i = 0; i< ant_num; i++){ 
-    weightVector[i] = complex2Phase(complexAngle); 
+    weightVector[i] = beam_util::complex2Phase(complexAngle); 
     complexAngle *= stepAngle; 
   } 
 

@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.6)
 project(Beam_algo)
 
+add_subdirectory(common)
+
+
 list(APPEND BEAM_SOURCES
   Beamtrainer.cpp
   Beamtrainer.hpp
@@ -12,8 +15,8 @@ list(APPEND BEAM_SOURCES
   CA_with_directional_beamtrainer.hpp
   CA_with_random_beamtrainer.cpp
   CA_with_random_beamtrainer.hpp
-  CA_kalmaned_with_random_beamtrainer.cpp
-  CA_kalmaned_with_random_beamtrainer.hpp
+  Kalmaned_with_random_beamtrainer.cpp
+  Kalmaned_with_random_beamtrainer.hpp
   Agent_beamtrainer.cpp
   Agent_beamtrainer.hpp
   Beam_algorithm.cpp
@@ -25,6 +28,7 @@ list(APPEND BEAM_SOURCES
 list(APPEND BEAM_LINKS
   armadillo
   KALMAN_FILTER_LIB
+  BEAM_ALGO_COMMON_LIB 
   )
 
 add_library(BEAM_ALGO_LIB STATIC ${BEAM_SOURCES})

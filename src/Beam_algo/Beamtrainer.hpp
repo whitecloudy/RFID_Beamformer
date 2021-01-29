@@ -6,12 +6,8 @@
 #include <memory>
 #include <utility>
 #include <iostream>
-#include "global/struct_global.hpp"
-
-
-#define PI  (3.14159265358979323846)
-#define Deg2Rad(_num) (double)(_num * (PI / 180))
-#define Rad2Deg(_num) (double)(_num / PI * 180.0)
+#include <global/struct_global.hpp>
+#include "common/Beam_util.hpp"
 
 class Beamtrainer{
   protected:
@@ -23,9 +19,6 @@ class Beamtrainer{
     static std::vector<int> curPhaseVector;
 
   protected:
-    static double complex2Phase(std::complex<double> complexData);
-    static std::complex<double> phase2NormalComplex(double phaseData);
-    
     std::vector<int> genRandomWeight(void);
 
   public:
