@@ -108,8 +108,8 @@ std::vector<int> Kalmaned_CA_calculator::processOptimalVector(void)
       channelMatrix = arma::inv(trainingWeightMatrix) * avgCorrColumn;
 
       arma::cx_mat   P_0(ant_num, ant_num, arma::fill::eye);
-      arma::cx_mat   Q(ant_num, ant_num, arma::fill::eye);
-      arma::cx_mat   R   = 0.1 * arma::cx_mat(ant_num, 1, arma::fill::ones);
+      arma::cx_mat   Q   = arma::cx_mat(ant_num, ant_num, arma::fill::eye);
+      arma::cx_mat   R   = 0.1 * arma::cx_mat(ant_num, ant_num, arma::fill::eye);
 
 
       filter = new Kalman_filter(ant_num, 
