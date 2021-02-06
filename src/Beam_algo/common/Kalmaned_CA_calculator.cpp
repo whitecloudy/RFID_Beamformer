@@ -108,7 +108,7 @@ std::vector<int> Kalmaned_CA_calculator::processOptimalVector(void)
       channelMatrix = arma::inv(trainingWeightMatrix) * avgCorrColumn;
 
       arma::cx_mat   P_0(ant_num, ant_num, arma::fill::eye);
-      arma::cx_mat   Q   = arma::cx_mat(ant_num, ant_num, arma::fill::eye);
+      arma::cx_mat   Q   = 0.1 * arma::cx_mat(ant_num, ant_num, arma::fill::eye);
       arma::cx_mat   R   = 0.1 * arma::cx_mat(ant_num, ant_num, arma::fill::eye);
 
 
@@ -119,7 +119,7 @@ std::vector<int> Kalmaned_CA_calculator::processOptimalVector(void)
                                 R);
     }else
     {
-      channelMatrix = filter->process(avgCorrColumn, arma::inv(trainingWeightMatrix), arma::cx_mat(ant_num, ant_num, arma::fill::eye));
+      channelMatrix = filter->process(avgCorrColumn, trainingWeightMatrix, arma::cx_mat(ant_num, ant_num, arma::fill::eye));
     }
 
     for (int i = 0; i < ant_num; i++){

@@ -1,5 +1,7 @@
 #include "CA_calculator.hpp"
 
+#define GAIN (0.1)
+
 
 CA_calculator::CA_calculator(int ant_num) : ant_num(ant_num)
 {
@@ -103,7 +105,15 @@ std::vector<int> CA_calculator::processOptimalVector(void)
   //Check current state is processable
   if(is_processable())
   {
-    arma::Col<std::complex<double>> channelMatrix = arma::inv(trainingWeightMatrix) * avgCorrColumn;
+    if(First)
+    {
+      channelMatrix = arma::inv(trainingWeightMatrix) * avgCorrColumn;
+      First = false;
+    }else{
+      arma::Col<std::complex<double>> curChaMat = arma::inv(trainingWeightMatrix) * avgCorrColumn;
+      channelMatrix = (1 - GAIN)*channelMatrix + GAIN * curChaMat;
+    }
+    
 
     for (int i = 0; i < ant_num; i++){
       phaseVector[i] = beam_util::complex2Phase(std::conj(channelMatrix(i)));

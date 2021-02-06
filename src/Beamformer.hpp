@@ -49,7 +49,7 @@ class Beamformer{
     int SIC_port_measure_over(void);
     int SIC_handler(struct average_corr_data &);
     int Signal_handler(struct average_corr_data &);
-    int dataLogging(struct average_corr_data &, bool optimal=false);
+    int dataLogging(struct average_corr_data &, bool optimal=false, const int which_op = 0);
 
   public:
     Beamformer(std::vector<int> ant_nums, BEAM_ALGO::algorithm beam_algo, int sic_ant_num);

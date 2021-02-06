@@ -36,6 +36,11 @@ class Beamtrainer{
 
     const bool isOptimalCalculated(void);
     const bool isOptimalUsed(void);
+
+    virtual const int which_optimal(void)
+    {
+      return 0;
+    }
 };
 
 
