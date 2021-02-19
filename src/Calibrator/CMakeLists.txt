@@ -1,0 +1,23 @@
+cmake_minimum_required(VERSION 2.6)
+project(calibration)
+
+
+list(APPEND CALIBRATION_SOURCES
+  Calibration.cpp
+  Calibration.hpp
+  VNA_comm.cpp
+  VNA_comm.hpp
+  )
+
+list(APPEND CALIBRATION_LINKS
+  AD5371_CTRL_LIB
+  )
+
+add_library(CALIBRATION_LIB STATIC ${CALIBRATION_SOURCES})
+target_link_libraries(CALIBRATION_LIB ${CALIBRATION_LINKS})
+
+list(APPEND BEAMFORMING_LIB_LIST
+  CALIBRATION_LIB
+  )
+
+set(BEAMFORMING_LIB_LIST ${BEAMFORMING_LIB_LIST} PARENT_SCOPE)

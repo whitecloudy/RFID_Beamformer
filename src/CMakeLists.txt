@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 2.6)
-project(Beam_algo)
+project(Beamforming)
 
 
 add_subdirectory(Beam_algo)
+add_subdirectory(Calibrator)
+
 
 list(APPEND BEAMFORMER_SOURCES
   Beamformer.cpp
@@ -11,6 +13,7 @@ list(APPEND BEAMFORMER_SOURCES
 
 list(APPEND BEAMFORMER_LINKS
   AD5371_CTRL_LIB
+  CALIBRATION_LIB
   SIC_LIB
   READER_COMM_LIB
   BEAM_ALGO_LIB
