@@ -173,7 +173,7 @@ int Calibration::save_csv_file(std::string filename)
     for(int i = 0; i < resolution; i++)
     {
       double volt = 10.0/resolution * i;
-      csvFile << "10.0, "<< volt << ", " <<attenuator_measured_data[i].real() << ", "<<attenuator_measured_data[i].imag() << std::endl;
+      csvFile << "0.0, "<< volt << ", " <<attenuator_measured_data[i].real() << ", "<<attenuator_measured_data[i].imag() << std::endl;
     }
 
     csvFile.close();
