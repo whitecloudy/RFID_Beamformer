@@ -6,7 +6,7 @@
 #define __BEAM_ANGLE_RANGE  (90)
 #define __BEAM_ANGLE_STEP   (10)
 
-CA_with_directional_beamtrainer::CA_with_directional_beamtrainer(int ant_num, int round_max) : Directional_beamtrainer(ant_num){
+CA_with_directional_beamtrainer::CA_with_directional_beamtrainer(int ant_num, int round_max) : Directional_beamtrainer(ant_num), ca_cal(ant_num){
   this->round_max = round_max;
 
   curCenterPhaseVector.resize(ant_num);
@@ -21,6 +21,8 @@ const std::vector<int> CA_with_directional_beamtrainer::startTraining(void){
   round_count = 0;
   current_angle = -__BEAM_ANGLE_RANGE;
   isTraining = true;
+  
+  ca_cal.clear();
 
   curPhaseVector = getDirectional(current_angle);
 
@@ -32,7 +34,38 @@ const std::vector<int> CA_with_directional_beamtrainer::startTraining(void){
  *  Handle the tag's respond
  */
 const std::vector<int> CA_with_directional_beamtrainer::getRespond(struct average_corr_data recvData){
-  return cannotGetRespond();
+
+  if(ca_cal.is_processable() && !optimal_used)
+  {
+    curPhaseVector = ca_cal.processOptimalVector();
+    optimal_used = true;
+  }else
+  {
+    if(!optimal_used)
+      ca_cal.setNewCorrData(std::complex<double>(recvData.avg_i, recvData.avg_q));
+
+    if(round_count <= 0)    //shift center beam
+    {
+      current_angle += __BEAM_ANGLE_STEP;
+      if(current_angle > __BEAM_ANGLE_RANGE){
+        current_angle = -__BEAM_ANGLE_RANGE;
+      }
+      //calculate new phase vector
+      curCenterPhaseVector = getDirectional(current_angle);
+      curPhaseVector = curCenterPhaseVector;
+      round_count = round_max;   //reset round counter
+    }else                   //scramble with random var
+    {
+      //TODO : someday should i have to get std value with parameter??
+      curPhaseVector = randomScramble(curCenterPhaseVector, 10);
+      round_count--;
+    }
+
+    ca_cal.setNewTrainingVector(curPhaseVector);
+    optimal_used = false;
+  }
+
+  return curPhaseVector;
 }
 
 
@@ -40,6 +73,7 @@ const std::vector<int> CA_with_directional_beamtrainer::getRespond(struct averag
  * Handle when the tag does not respond
  */
 const std::vector<int> CA_with_directional_beamtrainer::cannotGetRespond(void){
+  optimal_used = false;
   if(round_count <= 0)    //shift center beam
   {
     current_angle += __BEAM_ANGLE_STEP;
@@ -57,6 +91,7 @@ const std::vector<int> CA_with_directional_beamtrainer::cannotGetRespond(void){
     curPhaseVector = randomScramble(curCenterPhaseVector, 10);
     round_count--;
   }
+  ca_cal.resetTrainingVector(curPhaseVector);
 
   return curPhaseVector;
 }
@@ -69,7 +104,7 @@ const std::vector<int> CA_with_directional_beamtrainer::cannotGetRespond(void){
  */
 std::vector<int> CA_with_directional_beamtrainer::randomScramble(std::vector<int> center, double std){
   static std::default_random_engine random_gen;
-  
+
   std::normal_distribution<double> normal_random(0, std);
 
   for(int idx = 0; idx < center.size(); idx++){

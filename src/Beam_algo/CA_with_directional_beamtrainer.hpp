@@ -7,11 +7,16 @@
 #include <armadillo>
 #include <random>
 #include <memory>
+#include "common/CA_calculator.hpp"
+
 
 class CA_with_directional_beamtrainer : public Directional_beamtrainer{
   private:
     int round_count;
     int round_max;
+
+    CA_calculator ca_cal;
+
 
     std::vector<int> curCenterPhaseVector;
 
@@ -22,7 +27,6 @@ class CA_with_directional_beamtrainer : public Directional_beamtrainer{
     CA_with_directional_beamtrainer(int ant_num, int round_max=5);
 
     const std::vector<int> startTraining(void);
-
     const std::vector<int> getRespond(struct average_corr_data recvData);
     const std::vector<int> cannotGetRespond(void);
 
