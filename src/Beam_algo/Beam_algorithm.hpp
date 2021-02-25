@@ -17,6 +17,7 @@ namespace BEAM_ALGO
     CA_WITH_RANDOM,
     CA_KALMANED_WITH_RANDOM,
     RANDOM_BEAM,
+    TEST,
     AGENT
   };
 

@@ -23,6 +23,8 @@ list(APPEND BEAM_SOURCES
   Beam_algorithm.hpp
   Fixed_beamtrainer.cpp
   Fixed_beamtrainer.hpp
+  Test_beamtrainer.cpp
+  Test_beamtrainer.hpp
   )
 
 list(APPEND BEAM_LINKS

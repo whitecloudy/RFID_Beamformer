@@ -9,8 +9,11 @@ class CA_calculator{
   private:
     int ant_num;
 
+    bool First = true;
+
     arma::Mat<std::complex<double>> trainingWeightMatrix;
     arma::Col<std::complex<double>> avgCorrColumn;
+    arma::Col<std::complex<double>> channelMatrix;
 
   public:
     CA_calculator(int ant_num);
