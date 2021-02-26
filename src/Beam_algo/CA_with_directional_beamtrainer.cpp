@@ -5,6 +5,7 @@
 
 #define __BEAM_ANGLE_RANGE  (90)
 #define __BEAM_ANGLE_STEP   (10)
+#define __SCRAMBLE_VAR      (30)
 
 CA_with_directional_beamtrainer::CA_with_directional_beamtrainer(int ant_num, int round_max) : Directional_beamtrainer(ant_num), ca_cal(ant_num){
   this->round_max = round_max;
@@ -25,6 +26,7 @@ const std::vector<int> CA_with_directional_beamtrainer::startTraining(void){
   ca_cal.clear();
 
   curPhaseVector = getDirectional(current_angle);
+  ca_cal.setNewTrainingVector(curPhaseVector);
 
   return curPhaseVector;
 }
@@ -37,6 +39,7 @@ const std::vector<int> CA_with_directional_beamtrainer::getRespond(struct averag
 
   if(ca_cal.is_processable() && !optimal_used)
   {
+    ca_cal.setNewCorrData(std::complex<double>(recvData.avg_i, recvData.avg_q));
     curPhaseVector = ca_cal.processOptimalVector();
     optimal_used = true;
   }else
@@ -57,7 +60,7 @@ const std::vector<int> CA_with_directional_beamtrainer::getRespond(struct averag
     }else                   //scramble with random var
     {
       //TODO : someday should i have to get std value with parameter??
-      curPhaseVector = randomScramble(curCenterPhaseVector, 10);
+      curPhaseVector = randomScramble(curCenterPhaseVector, __SCRAMBLE_VAR);
       round_count--;
     }
 
@@ -74,13 +77,12 @@ const std::vector<int> CA_with_directional_beamtrainer::getRespond(struct averag
  */
 const std::vector<int> CA_with_directional_beamtrainer::cannotGetRespond(void){
   optimal_used = false;
-  if(round_count <= 0)    //shift center beam
+  if((round_count <= 0) || (curCenterPhaseVector == curPhaseVector))    //shift center beam
   {
     current_angle += __BEAM_ANGLE_STEP;
     if(current_angle > __BEAM_ANGLE_RANGE){
       current_angle = -__BEAM_ANGLE_RANGE;
     }
-
     //calculate new phase vector
     curCenterPhaseVector = getDirectional(current_angle);
     curPhaseVector = curCenterPhaseVector;
@@ -88,7 +90,7 @@ const std::vector<int> CA_with_directional_beamtrainer::cannotGetRespond(void){
   }else                   //scramble with random var
   {
     //TODO : someday should i have to get std value with parameter??
-    curPhaseVector = randomScramble(curCenterPhaseVector, 10);
+    curPhaseVector = randomScramble(curCenterPhaseVector, __SCRAMBLE_VAR);
     round_count--;
   }
   ca_cal.resetTrainingVector(curPhaseVector);

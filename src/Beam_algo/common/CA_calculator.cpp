@@ -70,6 +70,16 @@ int CA_calculator::resetTrainingVector(std::vector<int> trainingVector)
 {
   arma::Row<std::complex<double>> beamWeight(ant_num);
 
+  for(int i = 0; i<trainingWeightMatrix.n_rows ; i++)
+  {
+    if(arma::approx_equal(trainingWeightMatrix.row(i), beamWeight, "reldiff",0.01))
+    {
+      trainingWeightMatrix.shed_row(i);
+      avgCorrColumn.shed_row(i);
+    }
+  }
+
+
   for(int i = 0; i<ant_num; i++)
   {
     beamWeight(i) = beam_util::phase2NormalComplex(trainingVector[i]);
@@ -122,7 +132,7 @@ std::vector<int> CA_calculator::processOptimalVector(void)
       arma::Col<std::complex<double>> curChaMat = arma::inv(trainingWeightMatrix) * avgCorrColumn;
       channelMatrix = (1 - GAIN)*channelMatrix + GAIN * curChaMat;
     }
-    
+
 
     for (int i = 0; i < ant_num; i++){
       phaseVector[i] = beam_util::complex2Phase(std::conj(channelMatrix(i)));
@@ -139,7 +149,7 @@ std::vector<int> CA_calculator::processOptimalVector(void)
 
 bool CA_calculator::is_processable(void)
 {
-  return (trainingWeightMatrix.is_square() && (trainingWeightMatrix.n_rows == avgCorrColumn.n_rows) && (arma::rank(trainingWeightMatrix) == trainingWeightMatrix.n_rows)); 
+  return (trainingWeightMatrix.is_square() && (trainingWeightMatrix.n_rows == avgCorrColumn.n_rows) && (arma::rank(trainingWeightMatrix) == ant_num)); 
 }
 
 

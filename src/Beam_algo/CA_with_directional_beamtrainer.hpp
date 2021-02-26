@@ -8,6 +8,7 @@
 #include <random>
 #include <memory>
 #include "common/CA_calculator.hpp"
+#include "common/Kalmaned_CA_calculator.hpp"
 
 
 class CA_with_directional_beamtrainer : public Directional_beamtrainer{
@@ -15,7 +16,7 @@ class CA_with_directional_beamtrainer : public Directional_beamtrainer{
     int round_count;
     int round_max;
 
-    CA_calculator ca_cal;
+    Kalmaned_CA_calculator ca_cal;
 
 
     std::vector<int> curCenterPhaseVector;

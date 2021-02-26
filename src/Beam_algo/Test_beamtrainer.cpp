@@ -39,7 +39,7 @@ const std::vector<int> Test_beamtrainer::getRespond(struct average_corr_data rec
 
   if(optimal_used)
   {
-    if(kalman_ca_optimal) 
+    if(kalman_optimal) 
     {
       if(ca_cal.is_processable())  //CA turn
       {
@@ -97,7 +97,7 @@ const std::vector<int> Test_beamtrainer::cannotGetRespond(void){
 
   if(optimal_used)
   {
-    if(kalman_ca_optimal) //it was CA turn
+    if(kalman_optimal) //it was CA turn
     {
       if(ca_cal.is_processable())
       {
