@@ -129,8 +129,8 @@ Beamformer::Beamformer(std::vector<int> ant_nums_p, BEAM_ALGO::algorithm beam_al
     optimal_log<<"phase "<<ant_nums[i]<<", ";
 
   }
-  log<<"SIC phase, avg corr,corr i, corr q, cw i, cw q,std i,std q ,RN16, round"<<std::endl;
-  optimal_log<<"SIC phase, avg corr,corr i, corr q, cw i, cw q,std i,std q ,RN16, round"<<std::endl;
+  log<<"SIC phase, SIC power, avg corr,corr i, corr q, cw i, cw q,std i,std q ,RN16, round"<<std::endl;
+  optimal_log<<"SIC phase, SIC power, avg corr,corr i, corr q, cw i, cw q,std i,std q ,RN16, round"<<std::endl;
 
 
   this->ant_amount++;
@@ -286,7 +286,7 @@ int Beamformer::Signal_handler(struct average_corr_data & data){
     printf("avg iq : %f, %f\n",data.avg_i, data.avg_q);
     printf("avg amp : %f, %f\n\n",data.cw_i, data.cw_q);
 
-    dataLogging(data, BWtrainer->isOptimalUsed(), BWtrainer->which_optimal());
+    dataLogging(data, sic_ctrl->getPower(),  BWtrainer->isOptimalUsed(), BWtrainer->which_optimal());
 
     if(tag_id == PREDEFINED_RN16_)
     {
@@ -301,7 +301,7 @@ int Beamformer::Signal_handler(struct average_corr_data & data){
   }else{
     printf("Couldn't get RN16\n\n");
 
-    dataLogging(data, BWtrainer->isOptimalUsed(), BWtrainer->which_optimal());
+    dataLogging(data, sic_ctrl->getPower(), BWtrainer->isOptimalUsed(), BWtrainer->which_optimal());
     weightVector = BWtrainer->cannotGetRespond();
     vector2cur_weights(weightVector);
   }
@@ -316,7 +316,7 @@ int Beamformer::Signal_handler(struct average_corr_data & data){
 }
 
 
-int Beamformer::dataLogging(struct average_corr_data & data, bool optimal, const int which_op){
+int Beamformer::dataLogging(struct average_corr_data & data, double sic_power, bool optimal, const int which_op){
   uint16_t tag_id = 0;
 
   for(int i = 0; i<16; i++){
@@ -330,14 +330,14 @@ int Beamformer::dataLogging(struct average_corr_data & data, bool optimal, const
       for(int i = 0; i<ant_amount;i++){
         optimal_log<<cur_weights[ant_nums[i]]<<", ";
       }
-      optimal_log<<data.avg_corr<<", "<<data.avg_i<<", "<<data.avg_q<<", "<<data.cw_i<<", "<<data.cw_q<<", "<<data.stddev_i<<", "<<data.stddev_q<<", "<<tag_id<<", "<<data.round<< ", " <<which_op<<std::endl;
+      optimal_log<<sic_power<< ", "<<data.avg_corr<<", "<<data.avg_i<<", "<<data.avg_q<<", "<<data.cw_i<<", "<<data.cw_q<<", "<<data.stddev_i<<", "<<data.stddev_q<<", "<<tag_id<<", "<<data.round<< ", " <<which_op<<std::endl;
     }else
     {
       for(int i = 0; i<ant_amount;i++){
         log<<cur_weights[ant_nums[i]]<<", ";
       }
 
-      log<<data.avg_corr<<", "<<data.avg_i<<", "<<data.avg_q<<", "<<data.cw_i<<", "<<data.cw_q<<", "<<data.stddev_i<<", "<<data.stddev_q<<", "<<tag_id<<", "<<data.round<<std::endl;
+      log<<sic_power<< ", "<<data.avg_corr<<", "<<data.avg_i<<", "<<data.avg_q<<", "<<data.cw_i<<", "<<data.cw_q<<", "<<data.stddev_i<<", "<<data.stddev_q<<", "<<tag_id<<", "<<data.round<<std::endl;
     }
   }else if(data.successFlag == _PREAMBLE_FAIL){
     if(optimal)
@@ -345,13 +345,13 @@ int Beamformer::dataLogging(struct average_corr_data & data, bool optimal, const
       for(int i = 0; i<ant_amount;i++){
         optimal_log<<cur_weights[ant_nums[i]]<<", ";
       }
-      optimal_log<<0.0<<", "<<0.0<<", "<<0.0<<","<<data.cw_i<<", "<<data.cw_q<<", "<<data.stddev_i<<", "<<data.stddev_q<<", "<<"-"<<","<<data.round<<", "<<which_op<<std::endl;
+      optimal_log<<sic_power<< ", "<<0.0<<", "<<0.0<<", "<<0.0<<","<<data.cw_i<<", "<<data.cw_q<<", "<<data.stddev_i<<", "<<data.stddev_q<<", "<<"-"<<","<<data.round<<", "<<which_op<<std::endl;
     }else
     {
       for(int i = 0; i<ant_amount;i++){
         log<<cur_weights[ant_nums[i]]<<", ";
       }
-      log<<0.0<<", "<<0.0<<", "<<0.0<<","<<data.cw_i<<", "<<data.cw_q<<", "<<data.stddev_i<<", "<<data.stddev_q<<", "<<"-"<<","<<data.round<<std::endl;
+      log<<sic_power<< ", "<<0.0<<", "<<0.0<<", "<<0.0<<","<<data.cw_i<<", "<<data.cw_q<<", "<<data.stddev_i<<", "<<data.stddev_q<<", "<<"-"<<","<<data.round<<std::endl;
     }
   }else if(data.successFlag == _GATE_FAIL){
     if(optimal)
@@ -359,13 +359,13 @@ int Beamformer::dataLogging(struct average_corr_data & data, bool optimal, const
       for(int i = 0; i<ant_amount;i++){
         optimal_log<<cur_weights[ant_nums[i]]<<", ";
       }
-      optimal_log<<0.0<<", "<<0.0<<", "<<0.0<<","<<data.cw_i<<", "<<data.cw_q<<", "<<data.stddev_i<<", "<<data.stddev_q<<", "<<"GATE Failed"<<","<<data.round<<", "<<which_op<<std::endl;
+      optimal_log<<sic_power<< ", "<<0.0<<", "<<0.0<<", "<<0.0<<","<<data.cw_i<<", "<<data.cw_q<<", "<<data.stddev_i<<", "<<data.stddev_q<<", "<<"GATE Failed"<<","<<data.round<<", "<<which_op<<std::endl;
     }else
     {
       for(int i = 0; i<ant_amount;i++){
         log<<cur_weights[ant_nums[i]]<<", ";
       }
-      log<<0.0<<", "<<0.0<<", "<<0.0<<","<<data.cw_i<<", "<<data.cw_q<<", "<<data.stddev_i<<", "<<data.stddev_q<<", "<<"GATE Failed"<<","<<data.round<<std::endl;
+      log<<sic_power<< ", "<<0.0<<", "<<0.0<<", "<<0.0<<","<<data.cw_i<<", "<<data.cw_q<<", "<<data.stddev_i<<", "<<data.stddev_q<<", "<<"GATE Failed"<<","<<data.round<<std::endl;
     }
 
   }
