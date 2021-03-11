@@ -9,6 +9,7 @@ namespace beam_util
 {
   double complex2Phase(std::complex<double> complexData);
   std::complex<double> phase2NormalComplex(double phaseData);
+  double phaseTrimming(double phaseData);
 }
 
 #endif

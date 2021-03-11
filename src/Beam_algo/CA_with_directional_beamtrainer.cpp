@@ -7,10 +7,8 @@
 #define __BEAM_ANGLE_STEP   (10)
 #define __SCRAMBLE_VAR      (30)
 
-CA_with_directional_beamtrainer::CA_with_directional_beamtrainer(int ant_num, int round_max) : Directional_beamtrainer(ant_num), ca_cal(ant_num){
+CA_with_directional_beamtrainer::CA_with_directional_beamtrainer(int ant_num, std::vector<int> ant_array, int round_max) : Directional_beamtrainer(ant_num, ant_array), ca_cal(ant_num), curCenterPhaseVector(ant_num){
   this->round_max = round_max;
-
-  curCenterPhaseVector.resize(ant_num);
 }
 
 void CA_with_directional_beamtrainer::printClassName(void){
@@ -20,12 +18,14 @@ void CA_with_directional_beamtrainer::printClassName(void){
 const std::vector<int> CA_with_directional_beamtrainer::startTraining(void){
   //reset all the values
   round_count = 0;
-  current_angle = -__BEAM_ANGLE_RANGE;
+
+  reset_current_angles();
+
   isTraining = true;
   
   ca_cal.clear();
 
-  curPhaseVector = getDirectional(current_angle);
+  curPhaseVector = getDirectional(current_angles);
   ca_cal.setNewTrainingVector(curPhaseVector);
 
   return curPhaseVector;
@@ -49,12 +49,8 @@ const std::vector<int> CA_with_directional_beamtrainer::getRespond(struct averag
 
     if(round_count <= 0)    //shift center beam
     {
-      current_angle += __BEAM_ANGLE_STEP;
-      if(current_angle > __BEAM_ANGLE_RANGE){
-        current_angle = -__BEAM_ANGLE_RANGE;
-      }
       //calculate new phase vector
-      curCenterPhaseVector = getDirectional(current_angle);
+      curCenterPhaseVector = getNextBeam();
       curPhaseVector = curCenterPhaseVector;
       round_count = round_max;   //reset round counter
     }else                   //scramble with random var
@@ -79,12 +75,8 @@ const std::vector<int> CA_with_directional_beamtrainer::cannotGetRespond(void){
   optimal_used = false;
   if((round_count <= 0) || (curCenterPhaseVector == curPhaseVector))    //shift center beam
   {
-    current_angle += __BEAM_ANGLE_STEP;
-    if(current_angle > __BEAM_ANGLE_RANGE){
-      current_angle = -__BEAM_ANGLE_RANGE;
-    }
     //calculate new phase vector
-    curCenterPhaseVector = getDirectional(current_angle);
+    curCenterPhaseVector = getNextBeam();
     curPhaseVector = curCenterPhaseVector;
     round_count = round_max;   //reset round counter
   }else                   //scramble with random var

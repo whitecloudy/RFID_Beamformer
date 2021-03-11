@@ -52,7 +52,7 @@ class Beamformer{
     int dataLogging(struct average_corr_data &, double sic_power, bool optimal=false, const int which_op = 0);
 
   public:
-    Beamformer(std::vector<int> ant_nums, BEAM_ALGO::algorithm beam_algo, int sic_ant_num);
+    Beamformer(std::vector<int> ant_nums, BEAM_ALGO::algorithm beam_algo, int sic_ant_num, std::vector<int> ant_array);
     ~Beamformer();
     int start_beamformer(void);
 

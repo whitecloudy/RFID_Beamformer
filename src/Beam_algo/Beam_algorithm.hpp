@@ -21,7 +21,7 @@ namespace BEAM_ALGO
     AGENT
   };
 
-  Beamtrainer * get_beam_class(int ant_num, algorithm algo);
+  Beamtrainer * get_beam_class(int ant_num, algorithm algo, std::vector<int> ant_array = std::vector<int>(0));
 
   algorithm parse_beam_algorithm(std::string input);
 

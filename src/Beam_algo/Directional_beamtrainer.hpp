@@ -7,14 +7,21 @@
 
 class Directional_beamtrainer : public Beamtrainer{
   protected:
-    int current_angle;
+    std::vector<int> current_angles;
+    std::vector<int> ant_array;
 
   protected:
-    std::vector<int> getDirectional(double angle);
+    std::vector<int> getDirectional(std::vector<int> angles);
+    std::vector<int> getDirectional(int angle);
+
+    std::vector<int> getNextBeam();
+
+    void reset_current_angles();
+
 
 
   public:
-    Directional_beamtrainer(int ant_num);
+    Directional_beamtrainer(int ant_num, std::vector<int> ant_array);
 
     const std::vector<int> startTraining(void);
 

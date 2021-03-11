@@ -13,7 +13,7 @@
 namespace BEAM_ALGO
 {
 
-  Beamtrainer * get_beam_class(int ant_num, algorithm algo)
+  Beamtrainer * get_beam_class(int ant_num, algorithm algo, std::vector<int> ant_array)
   {
     Beamtrainer * class_ptr;
 
@@ -23,10 +23,10 @@ namespace BEAM_ALGO
         class_ptr = new Random_beamtrainer(ant_num);
         break;
       case DIRECTIONAL_BEAM:
-        class_ptr = new Directional_beamtrainer(ant_num);
+        class_ptr = new Directional_beamtrainer(ant_num, ant_array);
         break;
       case CA_WITH_DIRECTIONAL:
-        class_ptr = new CA_with_directional_beamtrainer(ant_num);
+        class_ptr = new CA_with_directional_beamtrainer(ant_num, ant_array);
         break;
       case CA_WITH_RANDOM:
         class_ptr = new CA_with_random_beamtrainer(ant_num);

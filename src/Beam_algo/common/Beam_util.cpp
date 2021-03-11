@@ -26,4 +26,9 @@ namespace beam_util
   std::complex<double> phase2NormalComplex(double phaseData){
     return std::polar((double)1.0, (double)(phaseData*PI)/180);
   }
+
+  double phaseTrimming(double phaseData)
+  {
+    return complex2Phase(phase2NormalComplex(phaseData));
+  }
 }

@@ -108,12 +108,12 @@ int Beamformer::run_beamformer(void){
 
 
 
-Beamformer::Beamformer(std::vector<int> ant_nums_p, BEAM_ALGO::algorithm beam_algo, int sic_ant_num)
+Beamformer::Beamformer(std::vector<int> ant_nums_p, BEAM_ALGO::algorithm beam_algo, int sic_ant_num, std::vector<int> ant_array)
 {
   this->phase_ctrl = std::unique_ptr<Phase_Attenuator_controller>(new Phase_Attenuator_controller(0));
   this->ant_nums = ant_nums_p;
   this->ant_amount = ant_nums.size();
-  this->BWtrainer = std::unique_ptr<Beamtrainer>(BEAM_ALGO::get_beam_class(ant_amount, beam_algo));
+  this->BWtrainer = std::unique_ptr<Beamtrainer>(BEAM_ALGO::get_beam_class(ant_amount, beam_algo, ant_array));
 
   this->BWtrainer->printClassName();
 
@@ -124,14 +124,14 @@ Beamformer::Beamformer(std::vector<int> ant_nums_p, BEAM_ALGO::algorithm beam_al
 
   log.open("log.csv");
   optimal_log.open("log_optimal.csv");
+
   for(int i = 0; i<ant_amount; i++){
     log<<"phase "<<ant_nums[i]<<", ";
     optimal_log<<"phase "<<ant_nums[i]<<", ";
-
   }
+
   log<<"SIC phase, SIC power, avg corr,corr i, corr q, cw i, cw q,std i,std q ,RN16, round"<<std::endl;
   optimal_log<<"SIC phase, SIC power, avg corr,corr i, corr q, cw i, cw q,std i,std q ,RN16, round"<<std::endl;
-
 
   this->ant_amount++;
 }

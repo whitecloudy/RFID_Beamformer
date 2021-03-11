@@ -25,7 +25,7 @@ class CA_with_directional_beamtrainer : public Directional_beamtrainer{
     std::vector<int> randomScramble(std::vector<int> center, double std);
 
   public:
-    CA_with_directional_beamtrainer(int ant_num, int round_max=5);
+    CA_with_directional_beamtrainer(int ant_num, std::vector<int> ant_array, int round_max=5);
 
     const std::vector<int> startTraining(void);
     const std::vector<int> getRespond(struct average_corr_data recvData);
