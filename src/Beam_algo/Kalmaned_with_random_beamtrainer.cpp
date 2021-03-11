@@ -4,7 +4,6 @@
 #include <ctime>
 
 #define BaseNum (32)
-#define PI  (3.14159265358979323846)
 
 Kalmaned_with_random_beamtrainer::Kalmaned_with_random_beamtrainer(int ant_num) 
   : Beamtrainer(ant_num), ca_cal(ant_num)

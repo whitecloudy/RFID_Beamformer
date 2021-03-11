@@ -2,10 +2,8 @@
 #define _BEAM_UTIL_
 
 #include <complex>
+#include <global/global.hpp>
 
-#define PI  (3.14159265358979323846)
-#define Deg2Rad(_num) (double)(_num * (PI / 180))
-#define Rad2Deg(_num) (double)(_num / PI * 180.0)
 
 namespace beam_util
 {

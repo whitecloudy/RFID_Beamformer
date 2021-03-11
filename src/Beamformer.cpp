@@ -229,6 +229,7 @@ int Beamformer::SIC_port_measure(void){
   cur_weights[SIC_PORT_NUM_] = 0;
   phase_ctrl->ant_on(SIC_PORT_NUM_);
   phase_ctrl->phase_control(SIC_PORT_NUM_, SIC_REF_POWER, 0);
+
   phase_ctrl->data_apply();
   std::cout << "SIC Phase Set"<<std::endl;
 
@@ -258,6 +259,10 @@ int Beamformer::SIC_handler(struct average_corr_data & data){
     phase_ctrl->phase_control(SIC_PORT_NUM_, sic_ctrl->getPower(), cur_weights[SIC_PORT_NUM_]); //change phase and power
     phase_ctrl->data_apply();
   }
+
+  phase_ctrl->phase_control(SIC_PORT_NUM_, -16, 0); //change phase and power
+  phase_ctrl->data_apply();
+
 
   return 0;
 }
