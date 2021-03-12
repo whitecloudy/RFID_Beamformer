@@ -81,7 +81,7 @@ std::vector<int> Directional_beamtrainer::getDirectional(std::vector<int> angles
   std::vector<int> weightVector(ant_num); 
 
   std::complex<double> xStepAngle = beam_util::phase2NormalComplex(180.0 * std::sin(Deg2Rad(angles[0]))); 
-  std::complex<double> yStepAngle = beam_util::phase2NormalComplex(180.0 * std::sin(Deg2Rad(angles[1]))); 
+  std::complex<double> yStepAngle = beam_util::phase2NormalComplex(2 * 180.0 * std::sin(Deg2Rad(angles[1])));   //be power this because the distance between antenna set in Y axis is wider in double
 
   //Setting X Y angles
   std::complex<double> xComplexAngle(1,0); 
