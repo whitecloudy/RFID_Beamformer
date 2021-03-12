@@ -61,20 +61,24 @@ int Beamformer::run_beamformer(void){
   //loop until it is over
   while(1){
     /******************* SIC stage *******************/
-    if(ipc.data_recv(buffer) == -1){
-      std::cerr <<"Breaker is activated"<<std::endl;
-      return 0;   
-    }
-    memcpy(&data, buffer, sizeof(data));
+    do
+    {
+      if(ipc.data_recv(buffer) == -1){
+        std::cerr <<"Breaker is activated"<<std::endl;
+        return 0;   
+      }
+      memcpy(&data, buffer, sizeof(data));
 
-    //dataLogging(data);
+      //dataLogging(data);
 
-    SIC_handler(data);    
+      SIC_handler(data);    
 
-    //send ack so that Gen2 program can recognize that the beamforming has been done
-    if(ipc.send_ack() == -1){
-      return 0;
-    }
+      //send ack so that Gen2 program can recognize that the beamforming has been done
+      if(ipc.send_ack() == -1){
+        return 0;
+      }
+    }while(data.successFlag == _GATE_FAIL);
+
 
     /*************************************************/
 
@@ -92,8 +96,18 @@ int Beamformer::run_beamformer(void){
       if(tag_turn >= (EXPECTED_TAG_NUM_-1))
         Signal_handler(data);
 
+      //At the end of turn
+      if(tag_turn == (EXPECTED_TAG_NUM_-1))
+      {
+        sic_ctrl->setPower(-22);
+        sic_ctrl->setPhase(SIC_REF_PHASE);
+        phase_ctrl->phase_control(SIC_PORT_NUM_, -22, SIC_REF_PHASE);
+        phase_ctrl->data_apply();
+      }
+
       //send ack so that Gen2 program can recognize that the beamforming has been done
-      if(ipc.send_ack() == -1){
+      if(ipc.send_ack() == -1)
+      {
         return 0;
       }
     }
@@ -253,17 +267,11 @@ int Beamformer::SIC_port_measure_over(void){
 
 int Beamformer::SIC_handler(struct average_corr_data & data){
   if(data.successFlag != _GATE_FAIL){
-
     sic_ctrl->setCurrentAmp(std::complex<float>(data.cw_i, data.cw_q));
     cur_weights[SIC_PORT_NUM_] = sic_ctrl->getPhase();   //get SIC phase
     phase_ctrl->phase_control(SIC_PORT_NUM_, sic_ctrl->getPower(), cur_weights[SIC_PORT_NUM_]); //change phase and power
     phase_ctrl->data_apply();
   }
-
-  phase_ctrl->phase_control(SIC_PORT_NUM_, -16, 0); //change phase and power
-  phase_ctrl->data_apply();
-
-
   return 0;
 }
 
