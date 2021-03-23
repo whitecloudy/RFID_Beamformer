@@ -96,6 +96,30 @@ std::vector<int> Directional_beamtrainer::getDirectional(int angle_x, int angle_
   return weightVector; 
 }
 
+int Directional_beamtrainer::getBeamNum(void)
+{
+  int x_num = (cur_angle_x + __BEAM_X_ANGLE_RANGE)/__BEAM_ANGLE_STEP;
+  int y_num = (cur_angle_y + __BEAM_Y_ANGLE_RANGE)/__BEAM_ANGLE_STEP;
+
+  int y_range = (2 * __BEAM_Y_ANGLE_RANGE)/__BEAM_ANGLE_STEP + 1;
+
+  return (y_range*y_num) + x_num;
+}
+
+const std::vector<int> Directional_beamtrainer::beamNum2phaseVec(int beam_num)
+{
+  int y_range = (2 * __BEAM_Y_ANGLE_RANGE)/__BEAM_ANGLE_STEP + 1;
+
+  int x_num = beam_num%y_range;
+  int y_num = beam_num/y_range;
+
+  int angle_x = x_num*__BEAM_ANGLE_STEP - __BEAM_X_ANGLE_RANGE;
+  int angle_y = y_num*__BEAM_ANGLE_STEP - __BEAM_Y_ANGLE_RANGE;
+
+  return getDirectional(angle_x, angle_y);
+}
+
+
 
 std::vector<int> Directional_beamtrainer::getDirectional(int angle){ 
 
