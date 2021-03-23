@@ -7,16 +7,24 @@
 #include <armadillo>
 #include <random>
 #include <memory>
+#include <list>
 #include "common/CA_calculator.hpp"
 #include "common/Kalmaned_CA_calculator.hpp"
 
 
 class CA_with_directional_beamtrainer : public Directional_beamtrainer{
   private:
+    int best_beam_count;
+    int best_beam_max;
     int round_count;
     int round_max;
 
+    bool beamSearchFlag = true;
+
     CA_calculator ca_cal;
+
+    std::list<int> rankBeamNum;
+    std::list<double> rankBeamAmp;
 
 
     std::vector<int> curCenterPhaseVector;

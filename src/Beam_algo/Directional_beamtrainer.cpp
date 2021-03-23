@@ -68,6 +68,10 @@ std::vector<int> Directional_beamtrainer::getNextBeam(){
 }
 
 
+std::vector<int> Directional_beamtrainer::getCurBeam(){ 
+  return getDirectional(cur_angle_x, cur_angle_y);
+}
+
 
 /*
  * Make certain directional beam weight

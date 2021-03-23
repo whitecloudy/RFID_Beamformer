@@ -15,6 +15,7 @@ class Directional_beamtrainer : public Beamtrainer{
     std::vector<int> getDirectional(int angle);
 
     std::vector<int> getNextBeam();
+    std::vector<int> getCurBeam();
 
     void reset_current_angles();
 
