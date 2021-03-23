@@ -23,7 +23,7 @@ const std::vector<int> CA_with_directional_beamtrainer::startTraining(void){
   
   ca_cal.clear();
 
-  curPhaseVector = getDirectional(current_angles);
+  curPhaseVector = getDirectional(cur_angle_x, cur_angle_y);
   ca_cal.setNewTrainingVector(curPhaseVector);
 
   return curPhaseVector;
