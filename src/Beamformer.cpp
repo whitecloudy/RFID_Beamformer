@@ -85,32 +85,46 @@ int Beamformer::run_beamformer(void){
 
 
     /******************* Signal stage *****************/
-    for(int tag_turn = 0; tag_turn<(EXPECTED_TAG_NUM_); tag_turn++){
-      if(ipc.data_recv(buffer) == -1){
-        std::cerr <<"Breaker is activated"<<std::endl;
-        return 0;   
-      } 
-      memcpy(&data, buffer, sizeof(data));
-
-
-      if(tag_turn >= (EXPECTED_TAG_NUM_-1))
-        Signal_handler(data);
-
-      //At the end of turn
-      if(tag_turn == (EXPECTED_TAG_NUM_-1))
+      for(int tag_turn = 0; tag_turn<(EXPECTED_TAG_NUM_); tag_turn++)
       {
-        sic_ctrl->setPower(-22);
-        sic_ctrl->setPhase(SIC_REF_PHASE);
-        phase_ctrl->phase_control(SIC_PORT_NUM_, -22, SIC_REF_PHASE);
-        phase_ctrl->data_apply();
+        do
+        {
+          if(ipc.data_recv(buffer) == -1){
+            std::cerr <<"Breaker is activated"<<std::endl;
+            return 0;   
+          } 
+          memcpy(&data, buffer, sizeof(data));
+
+          if(data.successFlag != _GATE_FAIL)
+          {
+            counter++;
+            if(tag_turn >= (EXPECTED_TAG_NUM_-1))
+              Signal_handler(data);
+
+            //At the end of turn
+            if(tag_turn == (EXPECTED_TAG_NUM_-1))
+            {
+              sic_ctrl->setPower(-22);
+              sic_ctrl->setPhase(SIC_REF_PHASE);
+              phase_ctrl->phase_control(SIC_PORT_NUM_, -22, SIC_REF_PHASE);
+              phase_ctrl->data_apply();
+            }
+          }else
+          {
+            sic_ctrl->setPower(sic_ctrl->getPower() + 0.1);
+            phase_ctrl->phase_control(SIC_PORT_NUM_, sic_ctrl->getPower(), sic_ctrl->getPhase());
+            phase_ctrl->data_apply();
+
+          }
+
+          //send ack so that Gen2 program can recognize that the beamforming has been done
+          if(ipc.send_ack() == -1)
+          {
+            return 0;
+          }
+        }while(data.successFlag == _GATE_FAIL);
       }
 
-      //send ack so that Gen2 program can recognize that the beamforming has been done
-      if(ipc.send_ack() == -1)
-      {
-        return 0;
-      }
-    }
     /******************************************************/
   }//end of while(1)
 
@@ -343,14 +357,14 @@ int Beamformer::dataLogging(struct average_corr_data & data, double sic_power, b
       for(int i = 0; i<ant_amount;i++){
         optimal_log<<cur_weights[ant_nums[i]]<<", ";
       }
-      optimal_log<<sic_power<< ", "<<data.avg_corr<<", "<<data.avg_i<<", "<<data.avg_q<<", "<<data.cw_i<<", "<<data.cw_q<<", "<<data.stddev_i<<", "<<data.stddev_q<<", "<<tag_id<<", "<<data.round<< ", " <<which_op<<std::endl;
+      optimal_log<<sic_power<< ", "<<data.avg_corr<<", "<<data.avg_i<<", "<<data.avg_q<<", "<<data.cw_i<<", "<<data.cw_q<<", "<<data.stddev_i<<", "<<data.stddev_q<<", "<<tag_id<<", "<<data.round<< ", "<<which_op<<", " <<counter<<std::endl;
     }else
     {
       for(int i = 0; i<ant_amount;i++){
         log<<cur_weights[ant_nums[i]]<<", ";
       }
 
-      log<<sic_power<< ", "<<data.avg_corr<<", "<<data.avg_i<<", "<<data.avg_q<<", "<<data.cw_i<<", "<<data.cw_q<<", "<<data.stddev_i<<", "<<data.stddev_q<<", "<<tag_id<<", "<<data.round<<std::endl;
+      log<<sic_power<< ", "<<data.avg_corr<<", "<<data.avg_i<<", "<<data.avg_q<<", "<<data.cw_i<<", "<<data.cw_q<<", "<<data.stddev_i<<", "<<data.stddev_q<<", "<<tag_id<<", "<<data.round<<", "<<counter<<std::endl;
     }
   }else if(data.successFlag == _PREAMBLE_FAIL){
     if(optimal)
@@ -358,13 +372,13 @@ int Beamformer::dataLogging(struct average_corr_data & data, double sic_power, b
       for(int i = 0; i<ant_amount;i++){
         optimal_log<<cur_weights[ant_nums[i]]<<", ";
       }
-      optimal_log<<sic_power<< ", "<<0.0<<", "<<0.0<<", "<<0.0<<","<<data.cw_i<<", "<<data.cw_q<<", "<<data.stddev_i<<", "<<data.stddev_q<<", "<<"-"<<","<<data.round<<", "<<which_op<<std::endl;
+      optimal_log<<sic_power<< ", "<<0.0<<", "<<0.0<<", "<<0.0<<","<<data.cw_i<<", "<<data.cw_q<<", "<<data.stddev_i<<", "<<data.stddev_q<<", "<<"-"<<","<<data.round<<", "<<which_op<<", "<<counter<<std::endl;
     }else
     {
       for(int i = 0; i<ant_amount;i++){
         log<<cur_weights[ant_nums[i]]<<", ";
       }
-      log<<sic_power<< ", "<<0.0<<", "<<0.0<<", "<<0.0<<","<<data.cw_i<<", "<<data.cw_q<<", "<<data.stddev_i<<", "<<data.stddev_q<<", "<<"-"<<","<<data.round<<std::endl;
+      log<<sic_power<< ", "<<0.0<<", "<<0.0<<", "<<0.0<<","<<data.cw_i<<", "<<data.cw_q<<", "<<data.stddev_i<<", "<<data.stddev_q<<", "<<"-"<<","<<data.round<<", "<<counter<<std::endl;
     }
   }else if(data.successFlag == _GATE_FAIL){
     if(optimal)
@@ -372,7 +386,7 @@ int Beamformer::dataLogging(struct average_corr_data & data, double sic_power, b
       for(int i = 0; i<ant_amount;i++){
         optimal_log<<cur_weights[ant_nums[i]]<<", ";
       }
-      optimal_log<<sic_power<< ", "<<0.0<<", "<<0.0<<", "<<0.0<<","<<data.cw_i<<", "<<data.cw_q<<", "<<data.stddev_i<<", "<<data.stddev_q<<", "<<"GATE Failed"<<","<<data.round<<", "<<which_op<<std::endl;
+      optimal_log<<sic_power<< ", "<<0.0<<", "<<0.0<<", "<<0.0<<","<<data.cw_i<<", "<<data.cw_q<<", "<<data.stddev_i<<", "<<data.stddev_q<<", "<<"GATE Failed"<<","<<data.round<<", "<<counter<<std::endl;
     }else
     {
       for(int i = 0; i<ant_amount;i++){

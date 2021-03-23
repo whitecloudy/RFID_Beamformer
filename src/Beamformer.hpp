@@ -29,6 +29,8 @@ class Beamformer{
     int ant_amount;   //TODO : this is actually not nessesary.... need to be depricated
     std::vector<int> ant_nums;
     int cur_weights[ANT_num] = {};  //TODO : change this more neet way
+
+    int counter = 0;
     
 
   private:

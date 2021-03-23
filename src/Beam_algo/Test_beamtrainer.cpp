@@ -6,7 +6,7 @@
 #define BaseNum (32)
 
 Test_beamtrainer::Test_beamtrainer(int ant_num) 
-  : Beamtrainer(ant_num), ca_cal(ant_num), kalman_ca_cal(ant_num)
+  : Beamtrainer(ant_num), ca_cal(ant_num, 3), kalman_ca_cal(ant_num)
 {
 }
 
@@ -113,7 +113,7 @@ const std::vector<int> Test_beamtrainer::cannotGetRespond(void){
         ca_optimal = false;
         kalman_optimal = false;
       }
-    }else if(kalman_optimal) //it was kalman turn
+    }else if(ca_optimal) //it was kalman turn
     {
       curPhaseVector = getRandomWeight();
       ca_cal.setNewTrainingVector(curPhaseVector);

@@ -16,7 +16,7 @@ class CA_with_directional_beamtrainer : public Directional_beamtrainer{
     int round_count;
     int round_max;
 
-    Kalmaned_CA_calculator ca_cal;
+    CA_calculator ca_cal;
 
 
     std::vector<int> curCenterPhaseVector;

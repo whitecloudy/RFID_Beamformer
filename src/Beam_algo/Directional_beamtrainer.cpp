@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include <ctime>
 
-#define __BEAM_X_ANGLE_RANGE  (90)
+#define __BEAM_X_ANGLE_RANGE  (60)
 #define __BEAM_Y_ANGLE_RANGE  (30)
 #define __BEAM_ANGLE_STEP   (15)
 

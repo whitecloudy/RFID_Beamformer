@@ -11,9 +11,11 @@ class Test_beamtrainer : public Beamtrainer{
   private:
     int training_count = 0;
 
-    Kalmaned_CA_calculator  kalman_ca_cal;
+    //Kalmaned_CA_calculator  kalman_ca_cal;
     bool kalman_optimal   = false;
     CA_calculator           ca_cal;
+    CA_calculator           kalman_ca_cal;
+
     bool ca_optimal          = false;
 
 

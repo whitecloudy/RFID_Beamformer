@@ -3,8 +3,6 @@
 #include <cstdlib>
 #include <ctime>
 
-#define __BEAM_ANGLE_RANGE  (90)
-#define __BEAM_ANGLE_STEP   (10)
 #define __SCRAMBLE_VAR      (30)
 
 CA_with_directional_beamtrainer::CA_with_directional_beamtrainer(int ant_num, std::vector<int> ant_array, int round_max) : Directional_beamtrainer(ant_num, ant_array), ca_cal(ant_num), curCenterPhaseVector(ant_num){

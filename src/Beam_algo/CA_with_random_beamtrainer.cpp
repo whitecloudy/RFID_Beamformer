@@ -5,7 +5,7 @@
 
 #define BaseNum (32)
 
-CA_with_random_beamtrainer::CA_with_random_beamtrainer(int ant_num) : Beamtrainer(ant_num), ca_cal(ant_num){
+CA_with_random_beamtrainer::CA_with_random_beamtrainer(int ant_num) : Beamtrainer(ant_num), ca_cal(ant_num, 3){
 }
 
 void CA_with_random_beamtrainer::printClassName(void){

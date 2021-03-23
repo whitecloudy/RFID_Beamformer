@@ -1,9 +1,9 @@
 #include "CA_calculator.hpp"
 
-#define GAIN (0.1)
+#define GAIN (1)
 
 
-CA_calculator::CA_calculator(int ant_num) : ant_num(ant_num)
+CA_calculator::CA_calculator(int ant_num, int ML_Ratio) : ant_num(ant_num), ML_num(ant_num * ML_Ratio)
 {
   clear();
 }
@@ -17,29 +17,29 @@ int CA_calculator::setNewTrainingVector(std::vector<int> trainingVector)
     beamWeight(i) = beam_util::phase2NormalComplex(trainingVector[i]);
   }
 
-  for(int i = 0; i<trainingWeightMatrix.n_rows ; i++)
+  for(int i = 0; i<W_Mat.n_rows ; i++)
   {
-    if(arma::approx_equal(trainingWeightMatrix.row(i), beamWeight, "reldiff",0.01))
+    if(arma::approx_equal(W_Mat.row(i), beamWeight, "reldiff",0.01))
     {
-      trainingWeightMatrix.shed_row(i);
+      W_Mat.shed_row(i);
       avgCorrColumn.shed_row(i);
     }
   }
   
-  if(trainingWeightMatrix.n_rows == ant_num)
+  if(W_Mat.n_rows == ML_num)
   {
-    trainingWeightMatrix.shed_row(0);
-    trainingWeightMatrix.insert_rows(trainingWeightMatrix.n_rows, beamWeight);
-  }else if(trainingWeightMatrix.n_rows < ant_num)
+    W_Mat.shed_row(0);
+    W_Mat.insert_rows(W_Mat.n_rows, beamWeight);
+  }else if(W_Mat.n_rows < ML_num)
   {
-    trainingWeightMatrix.insert_rows(trainingWeightMatrix.n_rows, beamWeight);
+    W_Mat.insert_rows(W_Mat.n_rows, beamWeight);
   }else
   {
     std::cerr << "Training Weight Matrix Error"<<std::endl;
     exit(1);
   }
 
-  return trainingWeightMatrix.n_rows;
+  return W_Mat.n_rows;
 }
 
 
@@ -49,11 +49,11 @@ int CA_calculator::setNewCorrData(std::complex<double> corrData)
   arma::Row<std::complex<double>> data(1);
   data(0) = corrData;
 
-  if(avgCorrColumn.n_rows == ant_num)
+  if(avgCorrColumn.n_rows == ML_num)
   {
     avgCorrColumn.shed_row(0);
     avgCorrColumn.insert_rows(avgCorrColumn.n_rows, data);
-  }else if(avgCorrColumn.n_rows < ant_num)
+  }else if(avgCorrColumn.n_rows < ML_num)
   {
     avgCorrColumn.insert_rows(avgCorrColumn.n_rows, data);
   }else
@@ -70,11 +70,11 @@ int CA_calculator::resetTrainingVector(std::vector<int> trainingVector)
 {
   arma::Row<std::complex<double>> beamWeight(ant_num);
 
-  for(int i = 0; i<trainingWeightMatrix.n_rows ; i++)
+  for(int i = 0; i<W_Mat.n_rows ; i++)
   {
-    if(arma::approx_equal(trainingWeightMatrix.row(i), beamWeight, "reldiff",0.01))
+    if(arma::approx_equal(W_Mat.row(i), beamWeight, "reldiff",0.01))
     {
-      trainingWeightMatrix.shed_row(i);
+      W_Mat.shed_row(i);
       avgCorrColumn.shed_row(i);
     }
   }
@@ -85,17 +85,17 @@ int CA_calculator::resetTrainingVector(std::vector<int> trainingVector)
     beamWeight(i) = beam_util::phase2NormalComplex(trainingVector[i]);
   }
 
-  if(trainingWeightMatrix.n_rows <= 0)
+  if(W_Mat.n_rows <= 0)
   {
     std::cerr << "Tried to reset empty Training Vector"<< std::endl;
     exit(1);
   }else
   {
-    trainingWeightMatrix.shed_row(trainingWeightMatrix.n_rows - 1);
-    trainingWeightMatrix.insert_rows(trainingWeightMatrix.n_rows, beamWeight);
+    W_Mat.shed_row(W_Mat.n_rows - 1);
+    W_Mat.insert_rows(W_Mat.n_rows, beamWeight);
   }
 
-  return trainingWeightMatrix.n_rows;
+  return W_Mat.n_rows;
 }
 
 
@@ -126,10 +126,10 @@ std::vector<int> CA_calculator::processOptimalVector(void)
   {
     if(First)
     {
-      channelMatrix = arma::inv(trainingWeightMatrix) * avgCorrColumn;
+      channelMatrix = getInvMat(W_Mat) * avgCorrColumn;
       First = false;
     }else{
-      arma::Col<std::complex<double>> curChaMat = arma::inv(trainingWeightMatrix) * avgCorrColumn;
+      arma::Col<std::complex<double>> curChaMat = getInvMat(W_Mat) * avgCorrColumn;
       channelMatrix = (1 - GAIN)*channelMatrix + GAIN * curChaMat;
     }
 
@@ -149,16 +149,19 @@ std::vector<int> CA_calculator::processOptimalVector(void)
 
 bool CA_calculator::is_processable(void)
 {
-  return (trainingWeightMatrix.is_square() && (trainingWeightMatrix.n_rows == avgCorrColumn.n_rows) && (arma::rank(trainingWeightMatrix) == ant_num)); 
+  return ((W_Mat.n_rows == avgCorrColumn.n_rows) && (arma::rank(W_Mat) >= ant_num)); 
 }
 
 
 bool CA_calculator::clear(void)
 {
-  trainingWeightMatrix.reset();
+  W_Mat.reset();
   avgCorrColumn.reset();
 
   return false;
 }
 
-
+arma::cx_mat CA_calculator::getInvMat(arma::cx_mat Mat)
+{
+  return ((Mat.t() * Mat).i() * Mat.t());
+}

@@ -8,15 +8,19 @@
 class CA_calculator{
   private:
     int ant_num;
+    int ML_num;
 
     bool First = true;
 
-    arma::Mat<std::complex<double>> trainingWeightMatrix;
+    arma::Mat<std::complex<double>> W_Mat;
     arma::Col<std::complex<double>> avgCorrColumn;
     arma::Col<std::complex<double>> channelMatrix;
 
+  private:
+    arma::cx_mat getInvMat(arma::cx_mat Mat);
+
   public:
-    CA_calculator(int ant_num);
+    CA_calculator(int ant_num, int ML_Ratio = 1);
 
     int setNewTrainingVector(std::vector<int> trainingVector);
     int setNewCorrData(std::complex<double> corrData);
