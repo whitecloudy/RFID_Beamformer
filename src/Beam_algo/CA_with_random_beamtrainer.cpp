@@ -21,7 +21,6 @@ const std::vector<int> CA_with_random_beamtrainer::startTraining(void){
   isTraining = true;
 
   curPhaseVector = getRandomWeight();
-  ca_cal.setNewTrainingVector(curPhaseVector);
 
   return curPhaseVector;
 }
@@ -36,10 +35,10 @@ const std::vector<int> CA_with_random_beamtrainer::getRespond(struct average_cor
   if(optimal_used)
   {
     curPhaseVector = getRandomWeight();
-    ca_cal.setNewTrainingVector(curPhaseVector);
     optimal_used = false;
   }else
   {
+    ca_cal.setNewTrainingVector(curPhaseVector);
     training_count = ca_cal.setNewCorrData(corrData);
     if(ca_cal.is_processable())
     {
@@ -48,7 +47,6 @@ const std::vector<int> CA_with_random_beamtrainer::getRespond(struct average_cor
     }else
     {
       curPhaseVector = getRandomWeight();
-      ca_cal.setNewTrainingVector(curPhaseVector);
       optimal_used = false;
     }
   }
@@ -62,7 +60,6 @@ const std::vector<int> CA_with_random_beamtrainer::getRespond(struct average_cor
 const std::vector<int> CA_with_random_beamtrainer::cannotGetRespond(void){
   optimal_used = false;
   curPhaseVector = getRandomWeight();
-  ca_cal.resetTrainingVector(curPhaseVector);
 
   return curPhaseVector;
 }

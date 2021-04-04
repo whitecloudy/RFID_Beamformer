@@ -71,7 +71,17 @@ int Beamformer::run_beamformer(void){
 
       //dataLogging(data);
 
-      SIC_handler(data);    
+      if(data.successFlag != _GATE_FAIL)
+      {
+        SIC_handler(data);    
+      }
+      else
+      {
+        sic_ctrl->setPower(sic_ctrl->getPower() + 0.1);
+        phase_ctrl->phase_control(SIC_PORT_NUM_, sic_ctrl->getPower(), sic_ctrl->getPhase());
+        phase_ctrl->data_apply();
+
+      }
 
       //send ack so that Gen2 program can recognize that the beamforming has been done
       if(ipc.send_ack() == -1){
@@ -85,45 +95,43 @@ int Beamformer::run_beamformer(void){
 
 
     /******************* Signal stage *****************/
-      for(int tag_turn = 0; tag_turn<(EXPECTED_TAG_NUM_); tag_turn++)
+    for(int tag_turn = 0; tag_turn<(EXPECTED_TAG_NUM_); tag_turn++)
+    {
+      do
       {
-        do
+        if(ipc.data_recv(buffer) == -1){
+          std::cerr <<"Breaker is activated"<<std::endl;
+          return 0;   
+        } 
+        memcpy(&data, buffer, sizeof(data));
+
+        if(data.successFlag != _GATE_FAIL)
         {
-          if(ipc.data_recv(buffer) == -1){
-            std::cerr <<"Breaker is activated"<<std::endl;
-            return 0;   
-          } 
-          memcpy(&data, buffer, sizeof(data));
+          counter++;
 
-          if(data.successFlag != _GATE_FAIL)
+          //At the end of turn
+          if(tag_turn == (EXPECTED_TAG_NUM_-1))
           {
-            counter++;
-            if(tag_turn >= (EXPECTED_TAG_NUM_-1))
-              Signal_handler(data);
-
-            //At the end of turn
-            if(tag_turn == (EXPECTED_TAG_NUM_-1))
-            {
-              sic_ctrl->setPower(-22);
-              sic_ctrl->setPhase(SIC_REF_PHASE);
-              phase_ctrl->phase_control(SIC_PORT_NUM_, -22, SIC_REF_PHASE);
-              phase_ctrl->data_apply();
-            }
-          }else
-          {
-            sic_ctrl->setPower(sic_ctrl->getPower() + 0.1);
-            phase_ctrl->phase_control(SIC_PORT_NUM_, sic_ctrl->getPower(), sic_ctrl->getPhase());
+            Signal_handler(data);
+            sic_ctrl->setPower(-22);
+            sic_ctrl->setPhase(SIC_REF_PHASE);
+            phase_ctrl->phase_control(SIC_PORT_NUM_, -22, SIC_REF_PHASE);
             phase_ctrl->data_apply();
-
           }
+        }else
+        {
+          sic_ctrl->setPower(sic_ctrl->getPower() + 0.1);
+          phase_ctrl->phase_control(SIC_PORT_NUM_, sic_ctrl->getPower(), sic_ctrl->getPhase());
+          phase_ctrl->data_apply();
+        }
 
-          //send ack so that Gen2 program can recognize that the beamforming has been done
-          if(ipc.send_ack() == -1)
-          {
-            return 0;
-          }
-        }while(data.successFlag == _GATE_FAIL);
-      }
+        //send ack so that Gen2 program can recognize that the beamforming has been done
+        if(ipc.send_ack() == -1)
+        {
+          return 0;
+        }
+      }while(data.successFlag == _GATE_FAIL);
+    }
 
     /******************************************************/
   }//end of while(1)
@@ -289,10 +297,11 @@ int Beamformer::SIC_handler(struct average_corr_data & data){
   return 0;
 }
 
+
+
 int Beamformer::Signal_handler(struct average_corr_data & data){
   uint16_t tag_id = 0;
   std::vector<int> weightVector;
-
 
   for(int i = 0; i<16; i++){
     tag_id = tag_id << 1;
@@ -300,10 +309,10 @@ int Beamformer::Signal_handler(struct average_corr_data & data){
   }
 
   /*************************Add algorithm here***************************/
-  if(data.successFlag == _SUCCESS){
-
-
-    for(int i = 0; i<16; i++){
+  if(data.successFlag == _SUCCESS)
+  {
+    for(int i = 0; i<16; i++)
+    {
       tag_id = tag_id << 1;
       tag_id += data.RN16[i];
     }
@@ -341,6 +350,7 @@ int Beamformer::Signal_handler(struct average_corr_data & data){
 
   return 0;
 }
+
 
 
 int Beamformer::dataLogging(struct average_corr_data & data, double sic_power, bool optimal, const int which_op){

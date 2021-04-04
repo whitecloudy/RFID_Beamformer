@@ -10,6 +10,8 @@ CA_calculator::CA_calculator(int ant_num, int ML_Ratio) : ant_num(ant_num), ML_n
 
 int CA_calculator::setNewTrainingVector(std::vector<int> trainingVector)
 {
+  std::cout << "setNew Training : "<< W_Mat.n_rows << ", " << avgCorrColumn.n_rows<<std::endl;
+
   arma::Row<std::complex<double>> beamWeight(ant_num);
 
   for(int i = 0; i<ant_num; i++)
@@ -29,6 +31,8 @@ int CA_calculator::setNewTrainingVector(std::vector<int> trainingVector)
   if(W_Mat.n_rows == ML_num)
   {
     W_Mat.shed_row(0);
+    avgCorrColumn.shed_row(0);
+
     W_Mat.insert_rows(W_Mat.n_rows, beamWeight);
   }else if(W_Mat.n_rows < ML_num)
   {
@@ -45,22 +49,11 @@ int CA_calculator::setNewTrainingVector(std::vector<int> trainingVector)
 
 int CA_calculator::setNewCorrData(std::complex<double> corrData)
 {
-  std::cout << "setNew corr data"<<std::endl;
+  std::cout << "setNew corr data : "<< W_Mat.n_rows << ", " << avgCorrColumn.n_rows<<std::endl;
   arma::Row<std::complex<double>> data(1);
   data(0) = corrData;
 
-  if(avgCorrColumn.n_rows == ML_num)
-  {
-    avgCorrColumn.shed_row(0);
-    avgCorrColumn.insert_rows(avgCorrColumn.n_rows, data);
-  }else if(avgCorrColumn.n_rows < ML_num)
-  {
-    avgCorrColumn.insert_rows(avgCorrColumn.n_rows, data);
-  }else
-  {
-    std::cerr << "Average Correaltion Weight Matrix Error"<<std::endl;
-    exit(1);
-  }
+  avgCorrColumn.insert_rows(avgCorrColumn.n_rows, data);
 
   return avgCorrColumn.n_rows;
 }
@@ -68,7 +61,20 @@ int CA_calculator::setNewCorrData(std::complex<double> corrData)
 
 int CA_calculator::resetTrainingVector(std::vector<int> trainingVector)
 {
+  std::cout << "reset Training : "<< W_Mat.n_rows << ", " << avgCorrColumn.n_rows<<std::endl;
+
+  if(W_Mat.n_rows <= 0)
+  {
+    std::cerr << "Tried to reset empty Training Vector"<< std::endl;
+    exit(1);
+  }
+
   arma::Row<std::complex<double>> beamWeight(ant_num);
+
+  for(int i = 0; i<ant_num; i++)
+  {
+    beamWeight(i) = beam_util::phase2NormalComplex(trainingVector[i]);
+  }
 
   for(int i = 0; i<W_Mat.n_rows ; i++)
   {
@@ -79,21 +85,8 @@ int CA_calculator::resetTrainingVector(std::vector<int> trainingVector)
     }
   }
 
-
-  for(int i = 0; i<ant_num; i++)
-  {
-    beamWeight(i) = beam_util::phase2NormalComplex(trainingVector[i]);
-  }
-
-  if(W_Mat.n_rows <= 0)
-  {
-    std::cerr << "Tried to reset empty Training Vector"<< std::endl;
-    exit(1);
-  }else
-  {
-    W_Mat.shed_row(W_Mat.n_rows - 1);
-    W_Mat.insert_rows(W_Mat.n_rows, beamWeight);
-  }
+  W_Mat.shed_row(W_Mat.n_rows - 1);
+  W_Mat.insert_rows(W_Mat.n_rows, beamWeight);
 
   return W_Mat.n_rows;
 }
@@ -101,6 +94,8 @@ int CA_calculator::resetTrainingVector(std::vector<int> trainingVector)
 
 int CA_calculator::resetCorrData(std::complex<double> corrData)
 {
+  std::cout << "reset corr : "<< W_Mat.n_rows << ", " << avgCorrColumn.n_rows<<std::endl;
+
   arma::Row<std::complex<double>> data(1);
   data(0) = corrData;
 

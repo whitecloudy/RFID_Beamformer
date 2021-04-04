@@ -51,7 +51,7 @@ const std::vector<int> Beamtrainer::getRandomWeight(void){
  * Tell that the optimal Phase Vector is exist
  */
 const bool Beamtrainer::isOptimalCalculated(void){
-  return !optimalPhaseVector.empty();
+  return optimal_available;
 }
 
 /*

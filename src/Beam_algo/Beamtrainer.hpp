@@ -14,6 +14,7 @@ class Beamtrainer{
     int ant_num;
     bool isTraining = false;
     bool optimal_used = false;
+    bool optimal_available = false;
 
     std::vector<int> optimalPhaseVector;
     static std::vector<int> curPhaseVector;

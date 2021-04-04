@@ -22,7 +22,6 @@ const std::vector<int> Kalmaned_with_random_beamtrainer::startTraining(void){
   isTraining = true;
 
   curPhaseVector = getRandomWeight();
-  ca_cal.setNewTrainingVector(curPhaseVector);
 
   return curPhaseVector;
 }
@@ -38,10 +37,10 @@ const std::vector<int> Kalmaned_with_random_beamtrainer::getRespond(struct avera
   {
     curPhaseVector = getRandomWeight();
     ca_cal.setNewTrainingVector(curPhaseVector);
+    training_count = ca_cal.setNewCorrData(corrData);
     optimal_used = false;
   }else
   {
-    training_count = ca_cal.setNewCorrData(corrData);
     if(ca_cal.is_processable())
     {
       curPhaseVector = ca_cal.processOptimalVector();
@@ -49,7 +48,6 @@ const std::vector<int> Kalmaned_with_random_beamtrainer::getRespond(struct avera
     }else
     {
       curPhaseVector = getRandomWeight();
-      ca_cal.setNewTrainingVector(curPhaseVector);
       optimal_used = false;
     }
   }
@@ -63,7 +61,5 @@ const std::vector<int> Kalmaned_with_random_beamtrainer::getRespond(struct avera
 const std::vector<int> Kalmaned_with_random_beamtrainer::cannotGetRespond(void){
   optimal_used = false;
   curPhaseVector = getRandomWeight();
-  ca_cal.resetTrainingVector(curPhaseVector);
-
   return curPhaseVector;
 }
