@@ -25,14 +25,14 @@ const std::vector<int> Fixed_beamtrainer::startTraining(void){
 /*
  *  Handle the tag's respond
  */
-const std::vector<int> Fixed_beamtrainer::getRespond(struct average_corr_data recvData){
+const std::vector<int> Fixed_beamtrainer::getRespond(struct average_corr_data recvData,std::vector<int> usedVector){
     return cannotGetRespond();
 }
 
 /*
  * Handle when the tag does not respond
  */
-const std::vector<int> Fixed_beamtrainer::cannotGetRespond(void){
+const std::vector<int> Fixed_beamtrainer::cannotGetRespond(std::vector<int> usedVector){
     return curPhaseVector;
 }
 

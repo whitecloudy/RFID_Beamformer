@@ -17,14 +17,15 @@ class Beamtrainer{
     bool optimal_available = false;
 
     std::vector<int> optimalPhaseVector;
+    std::vector<int> trainingPhaseVector;
     static std::vector<int> curPhaseVector;
 
   protected:
     std::vector<int> genRandomWeight(void);
 
   public:
-    virtual const std::vector<int> getRespond(struct average_corr_data recvData) = 0;
-    virtual const std::vector<int> cannotGetRespond(void) = 0;
+    virtual const std::vector<int> getRespond(struct average_corr_data recvData, std::vector<int> usedVector=curPhaseVector) = 0;
+    virtual const std::vector<int> cannotGetRespond(std::vector<int> usedVector=curPhaseVector) = 0;
     virtual const std::vector<int> startTraining(void) = 0;
 
     virtual void printClassName(void) = 0;
@@ -33,7 +34,8 @@ class Beamtrainer{
     Beamtrainer(int ant_num);
     const std::vector<int> getRandomWeight(void);
     const std::vector<int> getOptimalPhaseVector(void);
-    const std::vector<int> getCurPhaseVector(void);
+    const std::vector<int> getTrainingPhaseVector(void);
+
 
     const bool isOptimalCalculated(void);
     const bool isOptimalUsed(void);

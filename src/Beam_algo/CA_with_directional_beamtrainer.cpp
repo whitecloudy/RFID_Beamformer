@@ -33,7 +33,7 @@ const std::vector<int> CA_with_directional_beamtrainer::startTraining(void){
 /*
  *  Handle the tag's respond
  */
-const std::vector<int> CA_with_directional_beamtrainer::getRespond(struct average_corr_data recvData){
+const std::vector<int> CA_with_directional_beamtrainer::getRespond(struct average_corr_data recvData, std::vector<int> usedVector){
 
   if(beamSearchFlag)
   {
@@ -55,19 +55,26 @@ const std::vector<int> CA_with_directional_beamtrainer::getRespond(struct averag
     rankBeamNum.insert(numIter, beamNum);
     rankBeamAmp.insert(ampIter, recvData.avg_corr);
 
-    curPhaseVector = getNextBeam();
+    trainingPhaseVector = getNextBeam();
 
     beamNum = getBeamNum();
 
     if((beamNum == 0)&&(rankBeamNum.size() != 0))
     {
-
       round_count = round_max;
-      best_beam_count = best_beam_max;
+      best_beam_count = 0;
 
-      curCenterPhaseVector = beamNum2phaseVec(rankBeamNum.front());
-      rankBeamNum.pop_front();
-      curPhaseVector = curCenterPhaseVector;
+      for(int i = 0; i < std::min(3, int(rankBeamNum.size())); i++)
+      {
+        bestBeamNum.push_back(rankBeamNum.front());
+        rankBeamNum.pop_front();
+      }
+
+      rankBeamNum.clear();
+      rankBeamAmp.clear();
+
+      curCenterPhaseVector = beamNum2phaseVec(bestBeamNum[best_beam_count % bestBeamNum.size()]);
+      trainingPhaseVector = curCenterPhaseVector;
 
       beamSearchFlag = false;
     }
@@ -75,54 +82,38 @@ const std::vector<int> CA_with_directional_beamtrainer::getRespond(struct averag
   {
     if(!optimal_used)
     {
-      ca_cal.setNewTrainingVector(curPhaseVector);
+      ca_cal.setNewTrainingVector(usedVector);
       ca_cal.setNewCorrData(std::complex<double>(recvData.avg_i, recvData.avg_q));
     }
 
     if(ca_cal.is_processable() && !optimal_used)
     {
-      curPhaseVector = ca_cal.processOptimalVector();
-      optimal_used = true;
-    }else
-    {
-      if(round_count > 0)                  //scramble with random var
-      {
-        //TODO : someday should i have to get std value with parameter??
-        curPhaseVector = randomScramble(curCenterPhaseVector, __SCRAMBLE_VAR);
-        round_count--;
-      }
-      else    //shift center beam
-      {
-        //calculate new phase vector
-        round_count = round_max;
-        best_beam_count--;
-
-        if(best_beam_count > 0) //Use Next best beam
-        {
-          if(rankBeamNum.size() != 0)
-          {
-            curCenterPhaseVector = beamNum2phaseVec(rankBeamNum.front());
-            rankBeamNum.pop_front();
-            curPhaseVector = curCenterPhaseVector;
-          }else{ //If we run out of center beam, just use previous one
-            curPhaseVector = randomScramble(curCenterPhaseVector, __SCRAMBLE_VAR);
-          }
-                  }else   //back to search mode
-        {
-          curPhaseVector = getCurBeam();
-
-          rankBeamNum.clear();
-          rankBeamAmp.clear();
-          beamSearchFlag = true;
-        }
-      }
-      optimal_used = false;
+      optimalPhaseVector = ca_cal.processOptimalVector();
+      optimal_available = true;
     }
+
+    if(round_count > 0)                  //scramble with random var
+    {
+      //TODO : someday should i have to get std value with parameter??
+      trainingPhaseVector = randomScramble(curCenterPhaseVector, __SCRAMBLE_VAR);
+      round_count--;
+    }
+    else    //shift center beam
+    {
+      round_count = round_max;
+      best_beam_count++; 
+
+      curCenterPhaseVector = beamNum2phaseVec(bestBeamNum[best_beam_count % bestBeamNum.size()]);
+      trainingPhaseVector = curCenterPhaseVector;
+    } 
+
   }
 
   /*
   */
 
+  optimal_used = false;
+  curCenterPhaseVector = trainingPhaseVector;
   return curPhaseVector;
 }
 
@@ -130,64 +121,54 @@ const std::vector<int> CA_with_directional_beamtrainer::getRespond(struct averag
 /*
  * Handle when the tag does not respond
  */
-const std::vector<int> CA_with_directional_beamtrainer::cannotGetRespond(void){
+const std::vector<int> CA_with_directional_beamtrainer::cannotGetRespond(std::vector<int> usedVector){
   if(beamSearchFlag)
   {
-    curPhaseVector = getNextBeam();
+    trainingPhaseVector = getNextBeam();
 
     int beamNum = getBeamNum();
 
     if((beamNum == 0)&&(rankBeamNum.size() != 0))
     {
-
       round_count = round_max;
-      best_beam_count = best_beam_max;
+      best_beam_count = 0;
 
-      curCenterPhaseVector = beamNum2phaseVec(rankBeamNum.front());
-      rankBeamNum.pop_front();
-      curPhaseVector = curCenterPhaseVector;
+      for(int i = 0; i < std::min(3, int(rankBeamNum.size())); i++)
+      {
+        bestBeamNum.push_back(rankBeamNum.front());
+        rankBeamNum.pop_front();
+      }
+
+      rankBeamNum.clear();
+      rankBeamAmp.clear();
+
+      curCenterPhaseVector = beamNum2phaseVec(bestBeamNum[best_beam_count % bestBeamNum.size()]);
+      trainingPhaseVector = curCenterPhaseVector;
 
       beamSearchFlag = false;
     }
   }else
   {
-    optimal_used = false;
 
     if(round_count > 0)                  //scramble with random var
     {
       //TODO : someday should i have to get std value with parameter??
-      curPhaseVector = randomScramble(curCenterPhaseVector, __SCRAMBLE_VAR);
+      trainingPhaseVector = randomScramble(curCenterPhaseVector, __SCRAMBLE_VAR);
       round_count--;
     }
     else    //shift center beam
     {
-      //calculate new phase vector
       round_count = round_max;
-      best_beam_count--;
+      best_beam_count++; 
 
-      if(best_beam_count > 0) //Use Next best beam
-      {
-        if(rankBeamNum.size() != 0)
-        {
-          curCenterPhaseVector = beamNum2phaseVec(rankBeamNum.front());
-          rankBeamNum.pop_front();
-          curPhaseVector = curCenterPhaseVector;
-        }else{ //If we run out of center beam, just use previous one
-          curPhaseVector = randomScramble(curCenterPhaseVector, __SCRAMBLE_VAR);
-        }
-      }else   //back to search mode
-      {
-        curPhaseVector = getCurBeam();
-
-        rankBeamNum.clear();
-        rankBeamAmp.clear();
-        beamSearchFlag = true;
-      }
-    }
-    optimal_used = false;
-
+      curCenterPhaseVector = beamNum2phaseVec(bestBeamNum[best_beam_count % bestBeamNum.size()]);
+      trainingPhaseVector = curCenterPhaseVector;
+    } 
   }
 
+
+  optimal_used = false;
+  curPhaseVector = trainingPhaseVector;
   return curPhaseVector;
 }
 

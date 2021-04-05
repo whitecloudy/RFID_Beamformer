@@ -16,7 +16,20 @@
 #include <fstream>
 #include <memory>
 
+#define TRAINING_ROUND (6)
+#define BEAMFORMING_ROUND (50)
+
 class Beamformer{
+  enum BeamformerStatus
+  {
+    TRAINING,
+    BEAMFORMING
+  } status = TRAINING;
+
+  int status_count;
+  int beamforming_count = 0;
+  bool needSIC = true;
+
   private:
     std::unique_ptr<Phase_Attenuator_controller> phase_ctrl;
     std::unique_ptr<SIC_controller> sic_ctrl;

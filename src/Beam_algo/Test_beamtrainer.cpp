@@ -33,7 +33,9 @@ const std::vector<int> Test_beamtrainer::startTraining(void){
 /*
  *  Handle the tag's respond
  */
-const std::vector<int> Test_beamtrainer::getRespond(struct average_corr_data recvData){
+
+//TODO : Need to fix this
+const std::vector<int> Test_beamtrainer::getRespond(struct average_corr_data recvData, std::vector<int> usedVector){
   std::complex<double> corrData(recvData.avg_i, recvData.avg_q);
 
   if(optimal_used)
@@ -92,7 +94,8 @@ const std::vector<int> Test_beamtrainer::getRespond(struct average_corr_data rec
 /*
  * Handle when the tag does not respond
  */
-const std::vector<int> Test_beamtrainer::cannotGetRespond(void){
+//TODO : Need to fix this
+const std::vector<int> Test_beamtrainer::cannotGetRespond(std::vector<int> usedVector){
 
   if(optimal_used)
   {

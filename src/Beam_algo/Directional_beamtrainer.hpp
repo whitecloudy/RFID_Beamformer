@@ -26,8 +26,8 @@ class Directional_beamtrainer : public Beamtrainer{
 
     const std::vector<int> startTraining(void);
 
-    const std::vector<int> getRespond(struct average_corr_data recvData);
-    const std::vector<int> cannotGetRespond(void);
+    const std::vector<int> getRespond(struct average_corr_data recvDatam, std::vector<int> usedVector = curPhaseVector);
+    const std::vector<int> cannotGetRespond(std::vector<int> usedVector = curPhaseVector);
 
     int getBeamNum(void);
     const std::vector<int> beamNum2phaseVec(int beam_num);

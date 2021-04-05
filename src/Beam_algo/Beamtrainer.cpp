@@ -44,7 +44,9 @@ std::vector<int> Beamtrainer::genRandomWeight(void){
  * Set New RandomWeight on the last matrix row
  */
 const std::vector<int> Beamtrainer::getRandomWeight(void){
-  return genRandomWeight();
+  optimal_used = false;
+  curPhaseVector = genRandomWeight();
+  return curPhaseVector;
 }
 
 /*
@@ -63,9 +65,14 @@ const bool Beamtrainer::isOptimalUsed(void){
 
 
 const std::vector<int> Beamtrainer::getOptimalPhaseVector(void){
+  optimal_used = true;
+  curPhaseVector = optimalPhaseVector;
   return optimalPhaseVector;
 }
 
-const std::vector<int> Beamtrainer::getCurPhaseVector(void){
-  return curPhaseVector;
+
+const std::vector<int> Beamtrainer::getTrainingPhaseVector(void){
+  optimal_used = false;
+  curPhaseVector = trainingPhaseVector;
+  return trainingPhaseVector;
 }

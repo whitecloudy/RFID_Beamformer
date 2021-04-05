@@ -29,16 +29,17 @@ const std::vector<int> Directional_beamtrainer::startTraining(void){
  
   isTraining = true;
 
-  curPhaseVector = getDirectional(cur_angle_x, cur_angle_y);
-
+  trainingPhaseVector = getDirectional(cur_angle_x, cur_angle_y);
+  curPhaseVector = trainingPhaseVector;
   return curPhaseVector;
 }
 
 /*
  *  Handle the tag's respond
  */
-const std::vector<int> Directional_beamtrainer::getRespond(struct average_corr_data recvData){
-  curPhaseVector = getNextBeam();
+const std::vector<int> Directional_beamtrainer::getRespond(struct average_corr_data recvData, std::vector<int> usedVector){
+  trainingPhaseVector = getNextBeam();
+  curPhaseVector = trainingPhaseVector;
 
   return curPhaseVector;
 }
@@ -46,8 +47,9 @@ const std::vector<int> Directional_beamtrainer::getRespond(struct average_corr_d
 /*
  * Handle when the tag does not respond
  */
-const std::vector<int> Directional_beamtrainer::cannotGetRespond(void){
-  curPhaseVector = getNextBeam();
+const std::vector<int> Directional_beamtrainer::cannotGetRespond(std::vector<int> usedVector){
+  trainingPhaseVector = getNextBeam();
+  curPhaseVector = trainingPhaseVector;
 
   return curPhaseVector;
 }

@@ -6,7 +6,6 @@
 #define BaseNum (32)
 
 Random_beamtrainer::Random_beamtrainer(int ant_num) : Beamtrainer(ant_num){
-  avgCorrColumn.set_size(ant_num);
 }
 
 void Random_beamtrainer::printClassName(void){
@@ -15,11 +14,10 @@ void Random_beamtrainer::printClassName(void){
 
 const std::vector<int> Random_beamtrainer::startTraining(void){
   //reset all the values
-  training_count = 0;
-  randomWeightMatrix.reset();
   isTraining = true;
 
-  curPhaseVector = getRandomWeight();
+  trainingPhaseVector = getRandomWeight();
+  curPhaseVector = trainingPhaseVector;
 
   return curPhaseVector;
 }
@@ -27,17 +25,17 @@ const std::vector<int> Random_beamtrainer::startTraining(void){
 /*
  *  Handle the tag's respond
  */
-const std::vector<int> Random_beamtrainer::getRespond(struct average_corr_data recvData){
-  curPhaseVector = getRandomWeight();
-
+const std::vector<int> Random_beamtrainer::getRespond(struct average_corr_data recvData, std::vector<int> usedVector){
+  trainingPhaseVector = getRandomWeight();
+  curPhaseVector = trainingPhaseVector;
   return curPhaseVector;
 }
 
 /*
  * Handle when the tag does not respond
  */
-const std::vector<int> Random_beamtrainer::cannotGetRespond(void){
-  curPhaseVector = getRandomWeight();
-
+const std::vector<int> Random_beamtrainer::cannotGetRespond(std::vector<int> usedVector){
+  trainingPhaseVector = getRandomWeight();
+  curPhaseVector = trainingPhaseVector;
   return curPhaseVector;
 }

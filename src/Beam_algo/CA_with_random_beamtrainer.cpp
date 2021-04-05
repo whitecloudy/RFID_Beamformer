@@ -20,8 +20,15 @@ const std::vector<int> CA_with_random_beamtrainer::startTraining(void){
   ca_cal.clear();
   isTraining = true;
 
-  curPhaseVector = getRandomWeight();
+  optimal_available = false;
+  optimal_used = false;
 
+
+  trainingPhaseVector = getRandomWeight();
+
+  std::cout<< "Ready"<<std::endl;
+
+  curPhaseVector = trainingPhaseVector;
   return curPhaseVector;
 }
 
@@ -29,37 +36,32 @@ const std::vector<int> CA_with_random_beamtrainer::startTraining(void){
 /*
  *  Handle the tag's respond
  */
-const std::vector<int> CA_with_random_beamtrainer::getRespond(struct average_corr_data recvData){
+const std::vector<int> CA_with_random_beamtrainer::getRespond(struct average_corr_data recvData, std::vector<int> usedVector){
   std::complex<double> corrData(recvData.avg_i, recvData.avg_q);
 
-  if(optimal_used)
+  optimal_used = false;
+
+  trainingPhaseVector = getRandomWeight();
+
+  ca_cal.setNewTrainingVector(usedVector);
+  training_count = ca_cal.setNewCorrData(corrData);
+
+  if(ca_cal.is_processable())
   {
-    curPhaseVector = getRandomWeight();
-    optimal_used = false;
-  }else
-  {
-    ca_cal.setNewTrainingVector(curPhaseVector);
-    training_count = ca_cal.setNewCorrData(corrData);
-    if(ca_cal.is_processable())
-    {
-      curPhaseVector = ca_cal.processOptimalVector();
-      optimal_used = true;
-    }else
-    {
-      curPhaseVector = getRandomWeight();
-      optimal_used = false;
-    }
+    optimalPhaseVector = ca_cal.processOptimalVector();
+    optimal_available = true;
   }
 
+  curPhaseVector = trainingPhaseVector;
   return curPhaseVector;
 }
 
 /*
  * Handle when the tag does not respond
  */
-const std::vector<int> CA_with_random_beamtrainer::cannotGetRespond(void){
+const std::vector<int> CA_with_random_beamtrainer::cannotGetRespond(std::vector<int> usedVector){
   optimal_used = false;
-  curPhaseVector = getRandomWeight();
-
+  trainingPhaseVector = getRandomWeight();
+  curPhaseVector = trainingPhaseVector;
   return curPhaseVector;
 }
