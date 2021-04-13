@@ -36,8 +36,15 @@ std::vector<int> Beamtrainer::genRandomWeight(void){
 }
 
 
+void Beamtrainer::reset_Beamtrainer(void)
+{
+  optimal_used = false;
+  optimal_available = false;
 
-
+  optimalPhaseVector.clear();
+  trainingPhaseVector.clear();
+  curPhaseVector.clear();
+}
 
 
 /*

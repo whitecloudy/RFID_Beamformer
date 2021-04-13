@@ -5,6 +5,10 @@
 
 CA_calculator::CA_calculator(int ant_num, int ML_Ratio) : ant_num(ant_num), ML_num(ant_num * ML_Ratio)
 {
+  if(ML_Ratio == 0)
+  {
+    ML_num = ant_num * 100;
+  }
   clear();
 }
 

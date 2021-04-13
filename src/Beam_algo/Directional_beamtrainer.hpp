@@ -19,6 +19,8 @@ class Directional_beamtrainer : public Beamtrainer{
 
     void reset_current_angles();
 
+    void reset_Directional_beamtrainer(void);
+
 
 
   public:

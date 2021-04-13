@@ -23,12 +23,17 @@ class CA_with_directional_beamtrainer : public Directional_beamtrainer{
 
     CA_calculator ca_cal;
 
-    std::list<int> rankBeamNum;
-    std::list<double> rankBeamAmp;
+    struct beamStruct
+    {
+      int beamNum;
+      double amp;
+    };
+    std::list<struct beamStruct> rankBeamL;
     std::vector<int> bestBeamNum;
 
-
     std::vector<int> curCenterPhaseVector;
+
+    void reset_CA_with_directional_beamtrainer(void);
 
   private:
     std::vector<int> randomScramble(std::vector<int> center, double std);

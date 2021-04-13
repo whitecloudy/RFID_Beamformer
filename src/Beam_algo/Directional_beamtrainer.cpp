@@ -25,7 +25,7 @@ void Directional_beamtrainer::reset_current_angles(void)
 
 const std::vector<int> Directional_beamtrainer::startTraining(void){
   //reset all the values
-  reset_current_angles();
+  reset_Directional_beamtrainer();
  
   isTraining = true;
 
@@ -33,6 +33,14 @@ const std::vector<int> Directional_beamtrainer::startTraining(void){
   curPhaseVector = trainingPhaseVector;
   return curPhaseVector;
 }
+
+
+void Directional_beamtrainer::reset_Directional_beamtrainer(void)
+{
+  reset_Beamtrainer();
+  reset_current_angles();
+}
+
 
 /*
  *  Handle the tag's respond

@@ -12,6 +12,8 @@ class CA_with_random_beamtrainer : public Beamtrainer{
 
     CA_calculator ca_cal;
 
+    void reset_CA_with_random_beamtrainer(void);
+
   public:
     CA_with_random_beamtrainer(int ant_num);
 

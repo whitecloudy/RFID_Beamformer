@@ -5,7 +5,7 @@
 
 #define BaseNum (32)
 
-CA_with_random_beamtrainer::CA_with_random_beamtrainer(int ant_num) : Beamtrainer(ant_num), ca_cal(ant_num, 3){
+CA_with_random_beamtrainer::CA_with_random_beamtrainer(int ant_num) : Beamtrainer(ant_num), ca_cal(ant_num, 0){
 }
 
 void CA_with_random_beamtrainer::printClassName(void){
@@ -16,13 +16,9 @@ void CA_with_random_beamtrainer::printClassName(void){
 
 const std::vector<int> CA_with_random_beamtrainer::startTraining(void){
   //reset all the values
-  training_count = 0;
-  ca_cal.clear();
+  reset_CA_with_random_beamtrainer();
+
   isTraining = true;
-
-  optimal_available = false;
-  optimal_used = false;
-
 
   trainingPhaseVector = getRandomWeight();
 
@@ -30,6 +26,14 @@ const std::vector<int> CA_with_random_beamtrainer::startTraining(void){
 
   curPhaseVector = trainingPhaseVector;
   return curPhaseVector;
+}
+
+void CA_with_random_beamtrainer::reset_CA_with_random_beamtrainer(void)
+{
+  reset_Beamtrainer();
+
+  training_count = 0;
+  ca_cal.clear();
 }
 
 

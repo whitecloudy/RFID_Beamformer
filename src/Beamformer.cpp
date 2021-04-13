@@ -69,24 +69,30 @@ int Beamformer::run_beamformer(void){
       }
       memcpy(&data, buffer, sizeof(data));
 
+      std::cout<<std::endl << data.round <<" " << data.cw_i << " "<< data.cw_q << std::endl << std::endl;
+
       //dataLogging(data);
 
       if(data.successFlag != _GATE_FAIL)
       {
         SIC_handler(data);    
+        needSIC = false;
       }
       else
       {
         sic_ctrl->setPower(sic_ctrl->getPower() + 0.1);
         phase_ctrl->phase_control(SIC_PORT_NUM_, sic_ctrl->getPower(), sic_ctrl->getPhase());
-        phase_ctrl->data_apply();
-
+        needSIC = true;
       }
 
-      needSIC = false;
 
       //send ack so that Gen2 program can recognize that the beamforming has been done
-      if(ipc.send_ack() == -1){
+      
+      phase_ctrl->data_apply();
+
+
+      if(ipc.send_ack(needSIC) == -1)
+      {
         return 0;
       }
     }while(data.successFlag == _GATE_FAIL);
@@ -107,34 +113,6 @@ int Beamformer::run_beamformer(void){
 
       if(data.successFlag != _GATE_FAIL)
       {
-
-        counter++;
-
-        if(status_count > 0)
-        {
-          status_count -= 1;
-          if(status == TRAINING)
-            needSIC = true;
-        }else
-        {
-          if(status == BEAMFORMING)
-          {
-            status = TRAINING;
-            status_count = TRAINING_ROUND;
-            needSIC = true;
-          }else if(status == TRAINING)
-          {
-            beamforming_count += 1;
-            if(BWtrainer->isOptimalCalculated())
-            {
-              status = BEAMFORMING;
-              status_count = BEAMFORMING_ROUND;
-              needSIC = true;
-            }else
-              status_count = TRAINING_ROUND;
-          }
-        }
-
         //At the end of turn
         Signal_handler(data);
 
@@ -143,17 +121,19 @@ int Beamformer::run_beamformer(void){
           sic_ctrl->setPower(-22);
           sic_ctrl->setPhase(SIC_REF_PHASE);
           phase_ctrl->phase_control(SIC_PORT_NUM_, -22, SIC_REF_PHASE);
-          phase_ctrl->data_apply();
         }
       }
       else
       {
+        needSIC = false;
         sic_ctrl->setPower(sic_ctrl->getPower() + 0.1);
         phase_ctrl->phase_control(SIC_PORT_NUM_, sic_ctrl->getPower(), sic_ctrl->getPhase());
-        phase_ctrl->data_apply();
       }
 
-      if(ipc.send_ack() == -1)
+
+      phase_ctrl->data_apply();
+      
+      if(ipc.send_ack(needSIC) == -1)
       {
         return 0;
       }
@@ -247,7 +227,7 @@ int Beamformer::weights_apply(int * weights){
   for(int i = 0; i<ant_amount-1; i++){
     phase_ctrl->phase_control(ant_nums[i], weights[ant_nums[i]]);
   }
-  return phase_ctrl->data_apply();
+  return 0;
 }
 
 
@@ -256,7 +236,7 @@ int Beamformer::weights_apply(void){
   for(int i = 0; i<ant_amount; i++){
     phase_ctrl->phase_control(ant_nums[i], weights[ant_nums[i]]);
   }
-  return phase_ctrl->data_apply();
+  return 0;
 }
 
 
@@ -312,7 +292,7 @@ int Beamformer::SIC_port_measure_over(void){
   }
 
   weights_apply(cur_weights);
-
+  phase_ctrl->data_apply();
   std::cout << "SIC over"<<std::endl;
 
   return 0;
@@ -323,7 +303,6 @@ int Beamformer::SIC_handler(struct average_corr_data & data){
     sic_ctrl->setCurrentAmp(std::complex<float>(data.cw_i, data.cw_q));
     cur_weights[SIC_PORT_NUM_] = sic_ctrl->getPhase();   //get SIC phase
     phase_ctrl->phase_control(SIC_PORT_NUM_, sic_ctrl->getPower(), cur_weights[SIC_PORT_NUM_]); //change phase and power
-    phase_ctrl->data_apply();
   }
   return 0;
 }
@@ -342,6 +321,8 @@ int Beamformer::Signal_handler(struct average_corr_data & data){
   /*************************Add algorithm here***************************/
 
   dataLogging(data, sic_ctrl->getPower(),  BWtrainer->isOptimalUsed(), BWtrainer->which_optimal());
+
+  counter++;
 
   if(status == TRAINING)
   {
@@ -366,18 +347,55 @@ int Beamformer::Signal_handler(struct average_corr_data & data){
       {
         BWtrainer->cannotGetRespond();
       }
-
     }else{
       printf("Couldn't get RN16\n\n");
       BWtrainer->cannotGetRespond();
     }
-    weightVector = BWtrainer->getTrainingPhaseVector();
-  }else if(status == BEAMFORMING)
-  {
-    weightVector = BWtrainer->getOptimalPhaseVector();
+    needSIC = true;
   }
-  vector2cur_weights(weightVector);
 
+  if(status_count > 1)
+  {
+    status_count -= 1;
+
+    if(status == TRAINING)
+    {
+      weightVector = BWtrainer->getTrainingPhaseVector();
+      needSIC = true;
+    }else if(status == BEAMFORMING)
+    {
+      weightVector = BWtrainer->getOptimalPhaseVector();
+      needSIC = false;
+    }
+  }else
+  {
+    needSIC = true;
+    if(status == BEAMFORMING)
+    {
+      status = TRAINING;
+      status_count = TRAINING_ROUND;
+      BWtrainer->startTraining();
+      weightVector = BWtrainer->getTrainingPhaseVector();
+    }else if(status == TRAINING)
+    {
+      beamforming_count += 1;
+
+      if(BWtrainer->isOptimalCalculated())
+      {
+        status = BEAMFORMING;
+        status_count = BEAMFORMING_ROUND;
+        weightVector = BWtrainer->getOptimalPhaseVector();
+      }else
+      {
+        status = TRAINING;
+        status_count = TRAINING_ROUND;
+        BWtrainer->startTraining();
+        weightVector = BWtrainer->getTrainingPhaseVector();
+      }
+    }
+  }
+
+  vector2cur_weights(weightVector);
 
   if(weights_apply(cur_weights)){
     std::cerr<<"weight apply failed"<<std::endl;

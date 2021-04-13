@@ -16,8 +16,8 @@
 #include <fstream>
 #include <memory>
 
-#define TRAINING_ROUND (6)
-#define BEAMFORMING_ROUND (50)
+#define TRAINING_ROUND (27 + 27)
+#define BEAMFORMING_ROUND (20)
 
 class Beamformer{
   enum BeamformerStatus
@@ -28,7 +28,7 @@ class Beamformer{
 
   int status_count;
   int beamforming_count = 0;
-  bool needSIC = true;
+  int needSIC = true;
 
   private:
     std::unique_ptr<Phase_Attenuator_controller> phase_ctrl;

@@ -5,7 +5,7 @@
 
 #define __SCRAMBLE_VAR      (30)
 
-CA_with_directional_beamtrainer::CA_with_directional_beamtrainer(int ant_num, std::vector<int> ant_array, int round_max) : Directional_beamtrainer(ant_num, ant_array), ca_cal(ant_num, 3), curCenterPhaseVector(ant_num){
+CA_with_directional_beamtrainer::CA_with_directional_beamtrainer(int ant_num, std::vector<int> ant_array, int round_max) : Directional_beamtrainer(ant_num, ant_array), ca_cal(ant_num, 0), curCenterPhaseVector(ant_num){
   this->round_max = round_max;
   this->best_beam_max = 3;
 }
@@ -16,18 +16,34 @@ void CA_with_directional_beamtrainer::printClassName(void){
 
 const std::vector<int> CA_with_directional_beamtrainer::startTraining(void){
   //reset all the values
-  round_count = 0;
-
-  reset_current_angles();
+  reset_CA_with_directional_beamtrainer();
 
   isTraining = true;
   
-  ca_cal.clear();
-
-  curPhaseVector = getDirectional(cur_angle_x, cur_angle_y);
+  trainingPhaseVector = getDirectional(cur_angle_x, cur_angle_y);
+  curPhaseVector = trainingPhaseVector;
 
   return curPhaseVector;
 }
+
+
+void CA_with_directional_beamtrainer::reset_CA_with_directional_beamtrainer(void)
+{
+  reset_Directional_beamtrainer();
+
+  round_count = 0;
+  best_beam_count = 0;
+
+  ca_cal.clear();
+
+  rankBeamL.clear();
+  bestBeamNum.clear();
+
+  curCenterPhaseVector.clear();
+
+  beamSearchFlag = true;
+}
+
 
 
 /*
@@ -37,44 +53,46 @@ const std::vector<int> CA_with_directional_beamtrainer::getRespond(struct averag
 
   if(beamSearchFlag)
   {
-
-    std::list<int>::iterator numIter = rankBeamNum.begin();
-    std::list<double>::iterator ampIter = rankBeamAmp.begin();
-
-    for (int beamAmp : rankBeamAmp)
+    for (auto beamIter = rankBeamL.begin(); true; beamIter++)
     {
-      if(beamAmp < recvData.avg_corr)
-        break;
+      if(((*beamIter).amp < recvData.avg_corr)||(beamIter == rankBeamL.end()))
+      {
+        struct beamStruct tmpData;
 
-      numIter++;
-      ampIter++;
+        tmpData.beamNum = getBeamNum();
+        tmpData.amp = recvData.avg_corr;
+        rankBeamL.insert(beamIter, tmpData);
+
+        break;
+      }
+
     }
 
-    int beamNum = getBeamNum();
-
-    rankBeamNum.insert(numIter, beamNum);
-    rankBeamAmp.insert(ampIter, recvData.avg_corr);
+    if(!optimal_used)
+    {
+      ca_cal.setNewTrainingVector(usedVector);
+      ca_cal.setNewCorrData(std::complex<double>(recvData.avg_i, recvData.avg_q));
+    }
 
     trainingPhaseVector = getNextBeam();
 
-    beamNum = getBeamNum();
+    int beamNum = getBeamNum();
 
-    if((beamNum == 0)&&(rankBeamNum.size() != 0))
+    if((beamNum == 0)&&(rankBeamL.size() != 0))
     {
       round_count = round_max;
       best_beam_count = 0;
 
-      for(int i = 0; i < std::min(3, int(rankBeamNum.size())); i++)
+      for(int i = 0; i < rankBeamL.size(); i++)
       {
-        bestBeamNum.push_back(rankBeamNum.front());
-        rankBeamNum.pop_front();
+        bestBeamNum.push_back(rankBeamL.front().beamNum);
+        rankBeamL.pop_front();
       }
 
-      rankBeamNum.clear();
-      rankBeamAmp.clear();
+      rankBeamL.clear();
 
       curCenterPhaseVector = beamNum2phaseVec(bestBeamNum[best_beam_count % bestBeamNum.size()]);
-      trainingPhaseVector = curCenterPhaseVector;
+      trainingPhaseVector = randomScramble(curCenterPhaseVector, __SCRAMBLE_VAR);
 
       beamSearchFlag = false;
     }
@@ -104,7 +122,7 @@ const std::vector<int> CA_with_directional_beamtrainer::getRespond(struct averag
       best_beam_count++; 
 
       curCenterPhaseVector = beamNum2phaseVec(bestBeamNum[best_beam_count % bestBeamNum.size()]);
-      trainingPhaseVector = curCenterPhaseVector;
+      trainingPhaseVector = randomScramble(curCenterPhaseVector, __SCRAMBLE_VAR);
     } 
 
   }
@@ -128,28 +146,26 @@ const std::vector<int> CA_with_directional_beamtrainer::cannotGetRespond(std::ve
 
     int beamNum = getBeamNum();
 
-    if((beamNum == 0)&&(rankBeamNum.size() != 0))
+    if((beamNum == 0)&&(rankBeamL.size() != 0))
     {
       round_count = round_max;
       best_beam_count = 0;
 
-      for(int i = 0; i < std::min(3, int(rankBeamNum.size())); i++)
+      for(int i = 0; i < rankBeamL.size(); i++)
       {
-        bestBeamNum.push_back(rankBeamNum.front());
-        rankBeamNum.pop_front();
+        bestBeamNum.push_back(rankBeamL.front().beamNum);
+        rankBeamL.pop_front();
       }
 
-      rankBeamNum.clear();
-      rankBeamAmp.clear();
+      rankBeamL.clear();
 
       curCenterPhaseVector = beamNum2phaseVec(bestBeamNum[best_beam_count % bestBeamNum.size()]);
-      trainingPhaseVector = curCenterPhaseVector;
+      trainingPhaseVector = randomScramble(curCenterPhaseVector, __SCRAMBLE_VAR);
 
       beamSearchFlag = false;
     }
   }else
   {
-
     if(round_count > 0)                  //scramble with random var
     {
       //TODO : someday should i have to get std value with parameter??
@@ -162,7 +178,7 @@ const std::vector<int> CA_with_directional_beamtrainer::cannotGetRespond(std::ve
       best_beam_count++; 
 
       curCenterPhaseVector = beamNum2phaseVec(bestBeamNum[best_beam_count % bestBeamNum.size()]);
-      trainingPhaseVector = curCenterPhaseVector;
+      trainingPhaseVector = randomScramble(curCenterPhaseVector, __SCRAMBLE_VAR);
     } 
   }
 
