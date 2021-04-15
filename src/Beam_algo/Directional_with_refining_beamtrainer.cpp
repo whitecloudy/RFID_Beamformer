@@ -19,7 +19,6 @@ Directional_with_refining_beamtrainer::Directional_with_refining_beamtrainer(int
     y_step = (training_frame-27)/3;
   }
 
-  std::cout << x_step << ", " <<y_step << std::endl;
 }
 
 void Directional_with_refining_beamtrainer::printClassName(void){
@@ -126,9 +125,7 @@ const std::vector<int> Directional_with_refining_beamtrainer::getNextRefiningBea
   double y_angle_step = (double)__BEAM_ANGLE_STEP/(y_step - 1);
 
   cur_refine_x = cur_center_x - (double)__BEAM_ANGLE_STEP/2 + x_angle_step * (round_count % x_step);
-  cur_refine_y = cur_center_y - (double)__BEAM_ANGLE_STEP/2 + y_angle_step * ((round_count / y_step) % y_step);
-
-  std::cout << "current Angle : " << cur_refine_x << ", " << cur_refine_y << std::endl;
+  cur_refine_y = cur_center_y - (double)__BEAM_ANGLE_STEP/2 + y_angle_step * ((round_count / x_step) % y_step);
 
   return getDirectional(cur_refine_x, cur_refine_y);
 }
