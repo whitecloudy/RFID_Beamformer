@@ -3,9 +3,6 @@
 #include <cstdlib>
 #include <ctime>
 
-#define __BEAM_X_ANGLE_RANGE  (60)
-#define __BEAM_Y_ANGLE_RANGE  (30)
-#define __BEAM_ANGLE_STEP   (15)
 
 Directional_beamtrainer::Directional_beamtrainer(int ant_num, std::vector<int> ant_array) : Beamtrainer(ant_num){
   this->ant_array = ant_array;

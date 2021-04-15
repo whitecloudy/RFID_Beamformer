@@ -16,7 +16,6 @@
 #include <fstream>
 #include <memory>
 
-#define TRAINING_ROUND (27 + 27)
 #define BEAMFORMING_ROUND (20)
 
 class Beamformer{
@@ -29,6 +28,8 @@ class Beamformer{
   int status_count;
   int beamforming_count = 0;
   int needSIC = true;
+
+  int training_round_max;
 
   private:
     std::unique_ptr<Phase_Attenuator_controller> phase_ctrl;
@@ -69,7 +70,7 @@ class Beamformer{
     int dataLogging(const struct average_corr_data &, double sic_power, bool optimal=false, const int which_op = 0);
 
   public:
-    Beamformer(std::vector<int> ant_nums, BEAM_ALGO::algorithm beam_algo, int sic_ant_num, std::vector<int> ant_array);
+    Beamformer(std::vector<int> ant_nums, BEAM_ALGO::algorithm beam_algo, int sic_ant_num, std::vector<int> ant_array, int k);
     ~Beamformer();
     int start_beamformer(void);
 

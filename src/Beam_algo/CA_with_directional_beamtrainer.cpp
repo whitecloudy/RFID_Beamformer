@@ -127,11 +127,8 @@ const std::vector<int> CA_with_directional_beamtrainer::getRespond(struct averag
 
   }
 
-  /*
-  */
-
   optimal_used = false;
-  curCenterPhaseVector = trainingPhaseVector;
+  curPhaseVector = trainingPhaseVector;
   return curPhaseVector;
 }
 

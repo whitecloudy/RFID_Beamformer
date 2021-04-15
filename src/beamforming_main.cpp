@@ -12,6 +12,7 @@
 static struct args_struct{
   bool                    debug = false;
   int                     sic_ant_num = -1;
+  int                     k;
   std::vector<int>        ant_nums;
   std::vector<int>        ant_array;
   BEAM_ALGO::algorithm    beam_algo;
@@ -23,6 +24,7 @@ int parse_arg(int argc, char ** argv){
   options.add_options()
     ("d,debug", "Enable debugging")
     ("r,array", "Antenna array", cxxopts::value<std::vector<int>>()->default_value("0"))
+    ("k,training_count", "Training Frame count value", cxxopts::value<int>()->default_value("3"))
     ("a,ant", "antenna number", cxxopts::value<std::vector<int>>())
     ("s,sic", "Self-interference Cancellation",cxxopts::value<int>()->default_value("-1"))
     ("A,algo", "Beamforming Algorithm", cxxopts::value<std::string>())
@@ -43,6 +45,7 @@ int parse_arg(int argc, char ** argv){
     exit(1);
 
   args.ant_array   = opt_result["r"].as<std::vector<int>>();
+
   if(args.ant_array.size() == 1)
   {
     args.ant_array[0] = args.ant_nums.size();
@@ -57,6 +60,8 @@ int parse_arg(int argc, char ** argv){
     exit(1);
   }
 
+  args.k         = opt_result["k"].as<int>();
+
   args.beam_algo = BEAM_ALGO::parse_beam_algorithm(opt_result["A"].as<std::string>());
   
   return 0;
@@ -69,7 +74,7 @@ int main(int argc, char ** argv) {
     return 1;
 
   //do test beamforming
-  Beamformer beamformer(args.ant_nums, args.beam_algo, args.sic_ant_num, args.ant_array);
+  Beamformer beamformer(args.ant_nums, args.beam_algo, args.sic_ant_num, args.ant_array, args.k);
 
   if(beamformer.start_beamformer()){
     std::cout<< "Error : beamformer has terminated with error"<< std::endl;

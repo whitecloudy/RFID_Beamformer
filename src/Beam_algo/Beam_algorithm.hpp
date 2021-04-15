@@ -13,6 +13,7 @@ namespace BEAM_ALGO
     NO_ALGO_SELECTED,
     FIXED_BEAM,
     DIRECTIONAL_BEAM,
+    DIRECTIONAL_REFINE_BEAM,
     CA_WITH_DIRECTIONAL,
     CA_WITH_RANDOM,
     CA_KALMANED_WITH_RANDOM,
@@ -21,7 +22,7 @@ namespace BEAM_ALGO
     AGENT
   };
 
-  Beamtrainer * get_beam_class(int ant_num, algorithm algo, std::vector<int> ant_array = std::vector<int>(0));
+  Beamtrainer * get_beam_class(int ant_num, int k, algorithm algo, std::vector<int> ant_array = std::vector<int>(0));
 
   algorithm parse_beam_algorithm(std::string input);
 

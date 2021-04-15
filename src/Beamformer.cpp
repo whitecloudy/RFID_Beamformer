@@ -32,7 +32,7 @@ int Beamformer::stage_start(struct average_corr_data * data)
   }
 
   if(data != NULL)
-    memcpy(data, buffer, sizeof(data));
+    memcpy(data, buffer, sizeof(*data));
 
   return 0;
 }
@@ -137,14 +137,16 @@ int Beamformer::run_beamformer(void){
 
 
 
-Beamformer::Beamformer(std::vector<int> ant_nums_p, BEAM_ALGO::algorithm beam_algo, int sic_ant_num, std::vector<int> ant_array)
+Beamformer::Beamformer(std::vector<int> ant_nums_p, BEAM_ALGO::algorithm beam_algo, int sic_ant_num, std::vector<int> ant_array, int k)
 {
   this->phase_ctrl = std::unique_ptr<Phase_Attenuator_controller>(new Phase_Attenuator_controller(0));
   this->ant_nums = ant_nums_p;
   this->ant_amount = ant_nums.size();
-  this->BWtrainer = std::unique_ptr<Beamtrainer>(BEAM_ALGO::get_beam_class(ant_amount, beam_algo, ant_array));
+  this->training_round_max = 27 + k;
+  this->BWtrainer = std::unique_ptr<Beamtrainer>(BEAM_ALGO::get_beam_class(ant_amount, training_round_max, beam_algo, ant_array));
 
   this->BWtrainer->printClassName();
+
 
   if(sic_ant_num != -1){
     sic_enabled = true;
@@ -179,7 +181,7 @@ int Beamformer::init_beamformer(void){
   }
 
   status = TRAINING;
-  status_count = TRAINING_ROUND;
+  status_count = training_round_max;
 
   std::cout<<"Init"<<std::endl;
   return weights_apply(cur_weights);
@@ -365,7 +367,7 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
     if(status == BEAMFORMING)
     {
       status = TRAINING;
-      status_count = TRAINING_ROUND;
+      status_count = training_round_max;
       BWtrainer->startTraining();
       weightVector = BWtrainer->getTrainingPhaseVector();
     }else if(status == TRAINING)
@@ -380,7 +382,7 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
       }else
       {
         status = TRAINING;
-        status_count = TRAINING_ROUND;
+        status_count = training_round_max;
         BWtrainer->startTraining();
         weightVector = BWtrainer->getTrainingPhaseVector();
       }
