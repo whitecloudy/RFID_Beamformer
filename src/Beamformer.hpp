@@ -37,7 +37,6 @@ class Beamformer{
     
     IPC_controller ipc;
     std::ofstream log, optimal_log;
-
     bool sic_enabled = false;
     int ant_amount;   //TODO : this is actually not nessesary.... need to be depricated
     std::vector<int> ant_nums;
@@ -52,9 +51,11 @@ class Beamformer{
 
     void weights_printing(int * weights);
     int vector2cur_weights(std::vector<int> weightVector);
-
     int weights_apply(int * weights);
     int weights_apply(void);
+
+    int stage_start(struct average_corr_data * data);
+    int stage_finish(void);
 
     int init_beamformer(void);
     int run_beamformer(void);
@@ -62,9 +63,10 @@ class Beamformer{
 
     int SIC_port_measure(void);
     int SIC_port_measure_over(void);
-    int SIC_handler(struct average_corr_data &);
-    int Signal_handler(struct average_corr_data &);
-    int dataLogging(struct average_corr_data &, double sic_power, bool optimal=false, const int which_op = 0);
+    int SIC_handler(const struct average_corr_data &);
+    int SIC_adjustment(void);
+    int Signal_handler(const struct average_corr_data &);
+    int dataLogging(const struct average_corr_data &, double sic_power, bool optimal=false, const int which_op = 0);
 
   public:
     Beamformer(std::vector<int> ant_nums, BEAM_ALGO::algorithm beam_algo, int sic_ant_num, std::vector<int> ant_array);

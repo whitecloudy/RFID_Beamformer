@@ -22,36 +22,56 @@ double normal_random(double mean, double std_dev){
 }
 
 
+int Beamformer::stage_start(struct average_corr_data * data)
+{
+  char buffer[IO_BUF_SIZE] = {};
+
+  if(ipc.data_recv(buffer) == -1){
+    std::cerr <<"Breaker is activated"<<std::endl;
+    return 1;
+  }
+
+  if(data != NULL)
+    memcpy(data, buffer, sizeof(data));
+
+  return 0;
+}
+
+
+int Beamformer::stage_finish(void)
+{
+  phase_ctrl->data_apply();
+
+  if(ipc.send_ack(needSIC) == -1)
+  {
+    return 1;
+  }
+  return 0;
+}
+
+
+
 int Beamformer::run_beamformer(void){
 
-  char buffer[IO_BUF_SIZE] = {};
   struct average_corr_data data;
 
   /******************** SIC measure stage *************/
-  if(ipc.data_recv(buffer) == -1){
-    std::cerr <<"Breaker is activated"<<std::endl;
+  if(stage_start(NULL))
     return 0;
-  } 
 
   SIC_port_measure();
 
-  if(ipc.send_ack() == -1)
+  if(stage_finish())
     return 0;
 
-  if(ipc.data_recv(buffer) == -1){
-    std::cerr <<"Breaker is activated"<<std::endl;
+  if(stage_start(&data))
     return 0;
-  }
-
-  memcpy(&data, buffer, sizeof(data));
-  //dataLogging(data);
 
   sic_ctrl = std::unique_ptr<SIC_controller>(new SIC_controller(std::complex<float>(data.cw_i, data.cw_q)));
   SIC_port_measure_over();
 
   //initial phase here
-
-  if(ipc.send_ack() == -1)
+  if(stage_finish())
     return 0;
 
 
@@ -63,41 +83,25 @@ int Beamformer::run_beamformer(void){
     /******************* SIC stage *******************/
     do
     {
-      if(ipc.data_recv(buffer) == -1){
-        std::cerr <<"Breaker is activated"<<std::endl;
-        return 0;   
-      }
-      memcpy(&data, buffer, sizeof(data));
-
-      std::cout<<std::endl << data.round <<" " << data.cw_i << " "<< data.cw_q << std::endl << std::endl;
+      if(stage_start(&data))
+        return 0;
 
       //dataLogging(data);
 
       if(data.successFlag != _GATE_FAIL)
       {
         SIC_handler(data);    
-        needSIC = false;
       }
       else
       {
-        sic_ctrl->setPower(sic_ctrl->getPower() + 0.1);
-        phase_ctrl->phase_control(SIC_PORT_NUM_, sic_ctrl->getPower(), sic_ctrl->getPhase());
-        needSIC = true;
+        SIC_adjustment();
       }
-
 
       //send ack so that Gen2 program can recognize that the beamforming has been done
-      
-      phase_ctrl->data_apply();
-
-
-      if(ipc.send_ack(needSIC) == -1)
-      {
+      if(stage_finish())
         return 0;
-      }
+
     }while(data.successFlag == _GATE_FAIL);
-
-
     /*************************************************/
 
 
@@ -105,39 +109,21 @@ int Beamformer::run_beamformer(void){
     /******************* Signal stage *****************/
     do
     {
-      if(ipc.data_recv(buffer) == -1){
-        std::cerr <<"Breaker is activated"<<std::endl;
-        return 0;   
-      } 
-      memcpy(&data, buffer, sizeof(data));
+      if(stage_start(&data))
+        return 0;
 
       if(data.successFlag != _GATE_FAIL)
       {
         //At the end of turn
         Signal_handler(data);
-
-        if(needSIC)
-        {
-          sic_ctrl->setPower(-22);
-          sic_ctrl->setPhase(SIC_REF_PHASE);
-          phase_ctrl->phase_control(SIC_PORT_NUM_, -22, SIC_REF_PHASE);
-        }
       }
       else
       {
-        needSIC = false;
-        sic_ctrl->setPower(sic_ctrl->getPower() + 0.1);
-        phase_ctrl->phase_control(SIC_PORT_NUM_, sic_ctrl->getPower(), sic_ctrl->getPhase());
+        SIC_adjustment();
       }
 
-
-      phase_ctrl->data_apply();
-      
-      if(ipc.send_ack(needSIC) == -1)
-      {
+      if(stage_finish())
         return 0;
-      }
-
 
     }while((data.successFlag == _GATE_FAIL)||!needSIC);
     /******************************************************/
@@ -277,9 +263,7 @@ int Beamformer::SIC_port_measure(void){
   phase_ctrl->ant_on(SIC_PORT_NUM_);
   phase_ctrl->phase_control(SIC_PORT_NUM_, SIC_REF_POWER, 0);
 
-  phase_ctrl->data_apply();
   std::cout << "SIC Phase Set"<<std::endl;
-
   return 0;
 }
 
@@ -292,24 +276,32 @@ int Beamformer::SIC_port_measure_over(void){
   }
 
   weights_apply(cur_weights);
-  phase_ctrl->data_apply();
+
   std::cout << "SIC over"<<std::endl;
+  return 0;
+}
+
+int Beamformer::SIC_handler(const struct average_corr_data & data){
+  sic_ctrl->setCurrentAmp(std::complex<float>(data.cw_i, data.cw_q));
+  cur_weights[SIC_PORT_NUM_] = sic_ctrl->getPhase();   //get SIC phase
+  phase_ctrl->phase_control(SIC_PORT_NUM_, sic_ctrl->getPower(), cur_weights[SIC_PORT_NUM_]); //change phase and power
+
+  needSIC = false;
+  return 0;
+}
+
+int Beamformer::SIC_adjustment(void)
+{
+  needSIC = false;
+  sic_ctrl->setPower(sic_ctrl->getPower() + 0.1);
+  phase_ctrl->phase_control(SIC_PORT_NUM_, sic_ctrl->getPower(), sic_ctrl->getPhase());
 
   return 0;
 }
 
-int Beamformer::SIC_handler(struct average_corr_data & data){
-  if(data.successFlag != _GATE_FAIL){
-    sic_ctrl->setCurrentAmp(std::complex<float>(data.cw_i, data.cw_q));
-    cur_weights[SIC_PORT_NUM_] = sic_ctrl->getPhase();   //get SIC phase
-    phase_ctrl->phase_control(SIC_PORT_NUM_, sic_ctrl->getPower(), cur_weights[SIC_PORT_NUM_]); //change phase and power
-  }
-  return 0;
-}
 
 
-
-int Beamformer::Signal_handler(struct average_corr_data & data){
+int Beamformer::Signal_handler(const struct average_corr_data & data){
   uint16_t tag_id = 0;
   std::vector<int> weightVector;
 
@@ -401,6 +393,13 @@ int Beamformer::Signal_handler(struct average_corr_data & data){
     std::cerr<<"weight apply failed"<<std::endl;
     return 1;
   }
+
+  if(needSIC)
+  {
+    sic_ctrl->setPower(-22);
+    sic_ctrl->setPhase(SIC_REF_PHASE);
+    phase_ctrl->phase_control(SIC_PORT_NUM_, -22, SIC_REF_PHASE);
+  }
   /*****************************************************************/
 
   return 0;
@@ -408,7 +407,7 @@ int Beamformer::Signal_handler(struct average_corr_data & data){
 
 
 
-int Beamformer::dataLogging(struct average_corr_data & data, double sic_power, bool optimal, const int which_op){
+int Beamformer::dataLogging(const struct average_corr_data & data, double sic_power, bool optimal, const int which_op){
   uint16_t tag_id = 0;
 
   for(int i = 0; i<16; i++){
