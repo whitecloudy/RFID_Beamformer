@@ -110,8 +110,17 @@ const std::vector<int> Directional_with_refining_beamtrainer::reset_refining_bea
 {
   round_count = 0;
 
-  cur_refine_x = cur_center_x - (double)__BEAM_ANGLE_STEP/2;
-  cur_refine_y = cur_center_y - (double)__BEAM_ANGLE_STEP/2;
+  if(x_step > 1)
+    cur_refine_x = cur_center_x - (double)__BEAM_X_ANGLE_STEP/2;
+  else
+    cur_refine_x = cur_center_x;
+
+  if(y_step > 1)
+    cur_refine_y = cur_center_y - (double)__BEAM_Y_ANGLE_STEP/2;
+  else
+    cur_refine_y = cur_center_y;
+
+  std::cout << cur_refine_x << ", "<<cur_refine_y << std::endl;
   
   return getDirectional(cur_refine_x, cur_refine_y);
 
@@ -121,11 +130,22 @@ const std::vector<int> Directional_with_refining_beamtrainer::getNextRefiningBea
 {
   round_count+=1;
 
-  double x_angle_step = (double)__BEAM_ANGLE_STEP/(x_step - 1);
-  double y_angle_step = (double)__BEAM_ANGLE_STEP/(y_step - 1);
+  if(x_step > 1)
+  {
+    double x_angle_step = (double)__BEAM_X_ANGLE_STEP/(x_step - 1);
+    cur_refine_x = cur_center_x - (double)__BEAM_X_ANGLE_STEP/2 + x_angle_step * (round_count % x_step);
+  }else
+    cur_refine_x = cur_center_x;
 
-  cur_refine_x = cur_center_x - (double)__BEAM_ANGLE_STEP/2 + x_angle_step * (round_count % x_step);
-  cur_refine_y = cur_center_y - (double)__BEAM_ANGLE_STEP/2 + y_angle_step * ((round_count / x_step) % y_step);
+
+  if(y_step > 1)
+  {
+    double y_angle_step = (double)__BEAM_Y_ANGLE_STEP/(y_step - 1);
+    cur_refine_y = cur_center_y - (double)__BEAM_Y_ANGLE_STEP/2 + y_angle_step * ((round_count / x_step) % y_step);
+  }else
+    cur_refine_y = cur_center_y;
+
+  std::cout << cur_refine_x << ", "<<cur_refine_y << std::endl;
 
   return getDirectional(cur_refine_x, cur_refine_y);
 }

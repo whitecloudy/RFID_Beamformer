@@ -5,9 +5,13 @@
 #include "Beam_algo/Beamtrainer.hpp"
 #include <armadillo>
 
-#define __BEAM_X_ANGLE_RANGE  (60)
-#define __BEAM_Y_ANGLE_RANGE  (30)
-#define __BEAM_ANGLE_STEP   (15)
+#define __BEAM_X_ANGLE_BOTTOM (-60)
+#define __BEAM_X_ANGLE_TOP    (60)
+#define __BEAM_Y_ANGLE_BOTTOM (-30)
+#define __BEAM_Y_ANGLE_TOP    (0)
+#define __BEAM_X_ANGLE_STEP   (15)
+#define __BEAM_Y_ANGLE_STEP   (15)
+
 
 
 class Directional_beamtrainer : public Beamtrainer{

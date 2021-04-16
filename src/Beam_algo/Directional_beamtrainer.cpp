@@ -16,8 +16,8 @@ void Directional_beamtrainer::printClassName(void){
 
 void Directional_beamtrainer::reset_current_angles(void)
 {
-  cur_angle_x = -__BEAM_X_ANGLE_RANGE;
-  cur_angle_y = -__BEAM_Y_ANGLE_RANGE;
+  cur_angle_x = __BEAM_X_ANGLE_BOTTOM;
+  cur_angle_y = __BEAM_Y_ANGLE_BOTTOM;
 }
 
 const std::vector<int> Directional_beamtrainer::startTraining(void){
@@ -60,17 +60,17 @@ const std::vector<int> Directional_beamtrainer::cannotGetRespond(std::vector<int
 }
 
 std::vector<int> Directional_beamtrainer::getNextBeam(){ 
-  cur_angle_x += __BEAM_ANGLE_STEP;
-  if(cur_angle_x > __BEAM_X_ANGLE_RANGE){
-    cur_angle_x = -__BEAM_X_ANGLE_RANGE;
+  cur_angle_x += __BEAM_X_ANGLE_STEP;
+  if(cur_angle_x > __BEAM_X_ANGLE_TOP){
+    cur_angle_x = __BEAM_X_ANGLE_BOTTOM;
 
-    cur_angle_y += __BEAM_ANGLE_STEP;
-    if(cur_angle_y > 0)
+    cur_angle_y += __BEAM_Y_ANGLE_STEP;
+    if(cur_angle_y > __BEAM_Y_ANGLE_TOP)
     {
-      cur_angle_y = -__BEAM_Y_ANGLE_RANGE;
+      cur_angle_y = __BEAM_Y_ANGLE_BOTTOM;
     }
   }
-
+  
   return getDirectional(cur_angle_x, cur_angle_y);
 }
 
@@ -90,7 +90,9 @@ std::vector<int> Directional_beamtrainer::getDirectional(int angle_x, int angle_
   std::vector<int> weightVector(ant_num); 
 
   std::complex<double> xStepAngle = beam_util::phase2NormalComplex(180.0 * std::sin(Deg2Rad(angle_x))); 
-  std::complex<double> yStepAngle = beam_util::phase2NormalComplex(2 * 180.0 * std::sin(Deg2Rad(angle_y)));   //be power this because the distance between antenna set in Y axis is wider in double
+  //std::complex<double> yStepAngle = beam_util::phase2NormalComplex(2 * 180.0 * std::sin(Deg2Rad(angle_y)));   //be power this because the distance between antenna set in Y axis is wider in double
+  std::complex<double> yStepAngle = beam_util::phase2NormalComplex(180.0 * std::sin(Deg2Rad(angle_y)));
+
 
   //Setting X Y angles
   std::complex<double> xComplexAngle(1,0); 
@@ -109,23 +111,23 @@ std::vector<int> Directional_beamtrainer::getDirectional(int angle_x, int angle_
 
 int Directional_beamtrainer::getBeamNum(void)
 {
-  int x_num = (cur_angle_x + __BEAM_X_ANGLE_RANGE)/__BEAM_ANGLE_STEP;
-  int y_num = (cur_angle_y + __BEAM_Y_ANGLE_RANGE)/__BEAM_ANGLE_STEP;
+  int x_num = (cur_angle_x - __BEAM_X_ANGLE_BOTTOM)/__BEAM_X_ANGLE_STEP;
+  int y_num = (cur_angle_y - __BEAM_Y_ANGLE_BOTTOM)/__BEAM_Y_ANGLE_STEP;
 
-  int x_range = (2 * __BEAM_X_ANGLE_RANGE)/__BEAM_ANGLE_STEP + 1;
+  int x_range = (__BEAM_X_ANGLE_TOP - __BEAM_X_ANGLE_BOTTOM)/__BEAM_X_ANGLE_STEP + 1;
 
   return (x_range*y_num) + x_num;
 }
 
 const std::vector<int> Directional_beamtrainer::beamNum2phaseVec(int beam_num)
 {
-  int x_range = (2 * __BEAM_X_ANGLE_RANGE)/__BEAM_ANGLE_STEP + 1;
+  int x_range = (__BEAM_X_ANGLE_TOP - __BEAM_X_ANGLE_BOTTOM)/__BEAM_X_ANGLE_STEP + 1;
 
   int x_num = beam_num%x_range;
   int y_num = beam_num/x_range;
 
-  int angle_x = x_num*__BEAM_ANGLE_STEP - __BEAM_X_ANGLE_RANGE;
-  int angle_y = y_num*__BEAM_ANGLE_STEP - __BEAM_Y_ANGLE_RANGE;
+  int angle_x = x_num*__BEAM_X_ANGLE_STEP + __BEAM_X_ANGLE_BOTTOM;
+  int angle_y = y_num*__BEAM_Y_ANGLE_STEP + __BEAM_Y_ANGLE_BOTTOM;
 
   return getDirectional(angle_x, angle_y);
 }

@@ -366,14 +366,13 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
     needSIC = true;
     if(status == BEAMFORMING)
     {
+      beamforming_count += 1;
       status = TRAINING;
       status_count = training_round_max;
       BWtrainer->startTraining();
       weightVector = BWtrainer->getTrainingPhaseVector();
     }else if(status == TRAINING)
     {
-      beamforming_count += 1;
-
       if(BWtrainer->isOptimalCalculated())
       {
         status = BEAMFORMING;
@@ -381,6 +380,7 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
         weightVector = BWtrainer->getOptimalPhaseVector();
       }else
       {
+        beamforming_count += 1;
         status = TRAINING;
         status_count = training_round_max;
         BWtrainer->startTraining();
