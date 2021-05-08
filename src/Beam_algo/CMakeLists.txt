@@ -13,6 +13,8 @@ list(APPEND BEAM_SOURCES
   Directional_beamtrainer.hpp
   Directional_with_refining_beamtrainer.cpp
   Directional_with_refining_beamtrainer.hpp
+  Directional_with_refining_beamtrainer2.cpp
+  Directional_with_refining_beamtrainer2.hpp
   CA_with_directional_beamtrainer.cpp
   CA_with_directional_beamtrainer.hpp
   CA_with_random_beamtrainer.cpp

@@ -4,6 +4,7 @@
 #include "Beam_algo/Random_beamtrainer.hpp"
 #include "Beam_algo/Directional_beamtrainer.hpp"
 #include "Beam_algo/Directional_with_refining_beamtrainer.hpp"
+#include "Beam_algo/Directional_with_refining_beamtrainer2.hpp"
 #include "Beam_algo/Fixed_beamtrainer.hpp"
 #include "Beam_algo/CA_with_directional_beamtrainer.hpp"
 #include "Beam_algo/Agent_beamtrainer.hpp"
@@ -28,6 +29,9 @@ namespace BEAM_ALGO
         break;
       case DIRECTIONAL_REFINE_BEAM:
         class_ptr = new Directional_with_refining_beamtrainer(ant_num, ant_array, k);
+        break;
+      case DIRECTIONAL_REFINE_BEAM2:
+        class_ptr = new Directional_with_refining_beamtrainer2(ant_num, ant_array, k);
         break;
       case CA_WITH_DIRECTIONAL:
         class_ptr = new CA_with_directional_beamtrainer(ant_num, ant_array);
@@ -63,6 +67,7 @@ namespace BEAM_ALGO
     if(!input.compare("random"))                        algo = RANDOM_BEAM;
     else if(!input.compare("directional"))              algo = DIRECTIONAL_BEAM;
     else if(!input.compare("directional_refine"))       algo = DIRECTIONAL_REFINE_BEAM;
+    else if(!input.compare("directional_refine2"))       algo = DIRECTIONAL_REFINE_BEAM2;
     else if(!input.compare("fixed"))                    algo = FIXED_BEAM;
     else if(!input.compare("ca_with_directional"))      algo = CA_WITH_DIRECTIONAL;
     else if(!input.compare("ca_with_random"))           algo = CA_WITH_RANDOM;

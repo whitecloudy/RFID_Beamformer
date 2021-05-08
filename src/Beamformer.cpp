@@ -64,20 +64,43 @@ int Beamformer::run_beamformer(void){
   if(stage_finish())
     return 0;
 
-  if(stage_start(&data))
-    return 0;
+  int sic_measure_count = 5;
+  std::complex<float> avg_cw(0.0, 0.0);
+  do
+  {
+    if(stage_start(&data))
+      return 0;
 
-  sic_ctrl = std::unique_ptr<SIC_controller>(new SIC_controller(std::complex<float>(data.cw_i, data.cw_q)));
-  SIC_port_measure_over();
+    if(data.successFlag != _GATE_FAIL)
+    {
+      if(sic_measure_count > 0)
+      {
+        std::cout << std::complex<float>(data.cw_i, data.cw_q) << std::endl;
 
-  //initial phase here
-  if(stage_finish())
-    return 0;
+        avg_cw += std::complex<float>(data.cw_i, data.cw_q);
+      }else{
+        avg_cw /= 5;
+
+        std::cout << avg_cw << std::endl;
+        sic_ctrl = std::unique_ptr<SIC_controller>(new SIC_controller(avg_cw));
+        SIC_port_measure_over();
+      }
+
+      sic_measure_count -= 1;
+    }
+
+    //initial phase here
+    if(stage_finish())
+      return 0;
+    std::cout << "Getting Ready" << std::endl;
+  }while(data.successFlag == _GATE_FAIL || sic_measure_count >= 0);
 
 
   /*****************************************************/
 
 
+
+  std::cout << "READY"<<std::endl;
   //loop until it is over
   while(1){
     /******************* SIC stage *******************/
