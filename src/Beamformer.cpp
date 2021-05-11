@@ -113,17 +113,11 @@ int Beamformer::run_beamformer(void){
 
       if(data.successFlag != _GATE_FAIL)
       {
-        sic_adjust_trigger_count = SIC_ADJUST_THRESHOLD;
         SIC_handler(data);    
       }
       else
       {
-        sic_adjust_trigger_count--;
-        if(sic_adjust_trigger_count == 0)
-        {
-          sic_adjust_trigger_count = SIC_ADJUST_THRESHOLD;
-          SIC_adjustment();
-        }
+        SIC_adjustment();
       }
 
       //send ack so that Gen2 program can recognize that the beamforming has been done
@@ -152,7 +146,8 @@ int Beamformer::run_beamformer(void){
         if(sic_adjust_trigger_count == 0)
         {
           sic_adjust_trigger_count = SIC_ADJUST_THRESHOLD;
-          SIC_adjustment();
+          //SIC_adjustment();
+          SIC_handler(data);  //What if we put SIC handling here?
         }
       }
 
@@ -321,6 +316,9 @@ int Beamformer::SIC_handler(const struct average_corr_data & data){
   sic_ctrl->setCurrentAmp(std::complex<float>(data.cw_i, data.cw_q));
   cur_weights[SIC_PORT_NUM_] = sic_ctrl->getPhase();   //get SIC phase
   phase_ctrl->phase_control(SIC_PORT_NUM_, sic_ctrl->getPower(), cur_weights[SIC_PORT_NUM_]); //change phase and power
+  sic_ctrl->setPower(idx2dB(dB2idx(sic_ctrl->getPower())));
+  sic_ctrl->setPhase(cur_weights[SIC_PORT_NUM_]);
+
 
   needSIC = false;
   return 0;

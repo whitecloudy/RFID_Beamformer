@@ -17,7 +17,7 @@
 #include <memory>
 
 #define BEAMFORMING_ROUND (20)
-#define SIC_ADJUST_THRESHOLD (5)
+#define SIC_ADJUST_THRESHOLD (3)
 
 class Beamformer{
   enum BeamformerStatus
