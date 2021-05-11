@@ -28,6 +28,7 @@ class Beamformer{
   int status_count;
   int beamforming_count = 0;
   int needSIC = true;
+  bool sic_adjust_once = false;
 
   int training_round_max;
 

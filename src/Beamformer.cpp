@@ -142,7 +142,12 @@ int Beamformer::run_beamformer(void){
       }
       else
       {
-        SIC_adjustment();
+        //needSIC = false;
+        if(status != BEAMFORMING || sic_adjust_once != true)
+        {
+          sic_adjust_once = true;
+          SIC_adjustment();
+        }
       }
 
       if(stage_finish())
@@ -400,6 +405,7 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
       {
         status = BEAMFORMING;
         status_count = BEAMFORMING_ROUND;
+        sic_adjust_once = false;
         weightVector = BWtrainer->getOptimalPhaseVector();
       }else
       {
