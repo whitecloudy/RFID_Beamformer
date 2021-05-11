@@ -113,11 +113,17 @@ int Beamformer::run_beamformer(void){
 
       if(data.successFlag != _GATE_FAIL)
       {
+        sic_adjust_trigger_count = SIC_ADJUST_THRESHOLD;
         SIC_handler(data);    
       }
       else
       {
-        SIC_adjustment();
+        sic_adjust_trigger_count--;
+        if(sic_adjust_trigger_count == 0)
+        {
+          sic_adjust_trigger_count = SIC_ADJUST_THRESHOLD;
+          SIC_adjustment();
+        }
       }
 
       //send ack so that Gen2 program can recognize that the beamforming has been done
@@ -137,15 +143,15 @@ int Beamformer::run_beamformer(void){
 
       if(data.successFlag != _GATE_FAIL)
       {
-        //At the end of turn
+        sic_adjust_trigger_count = SIC_ADJUST_THRESHOLD;
         Signal_handler(data);
       }
       else
       {
-        //needSIC = false;
-        if(status != BEAMFORMING || sic_adjust_once != true)
+        sic_adjust_trigger_count--;
+        if(sic_adjust_trigger_count == 0)
         {
-          sic_adjust_once = true;
+          sic_adjust_trigger_count = SIC_ADJUST_THRESHOLD;
           SIC_adjustment();
         }
       }
@@ -405,7 +411,6 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
       {
         status = BEAMFORMING;
         status_count = BEAMFORMING_ROUND;
-        sic_adjust_once = false;
         weightVector = BWtrainer->getOptimalPhaseVector();
       }else
       {

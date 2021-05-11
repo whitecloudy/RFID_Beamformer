@@ -17,6 +17,7 @@
 #include <memory>
 
 #define BEAMFORMING_ROUND (20)
+#define SIC_ADJUST_THRESHOLD (5)
 
 class Beamformer{
   enum BeamformerStatus
@@ -28,7 +29,7 @@ class Beamformer{
   int status_count;
   int beamforming_count = 0;
   int needSIC = true;
-  bool sic_adjust_once = false;
+  int sic_adjust_trigger_count = 5;
 
   int training_round_max;
 
