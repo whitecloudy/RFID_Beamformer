@@ -83,3 +83,29 @@ const std::vector<int> Beamtrainer::getTrainingPhaseVector(void){
   curPhaseVector = trainingPhaseVector;
   return trainingPhaseVector;
 }
+
+std::vector<int> Beamtrainer::beamPhaseShift(std::complex<double> angle, std::vector<int> phaseVector)
+{
+  double angles = Rad2Deg(std::arg(angle));
+
+  beamPhaseShift(angles, phaseVector);
+}
+
+std::vector<int> Beamtrainer::beamPhaseShift(double angle, std::vector<int> phaseVector)
+{
+  for(int i = 0; i < phaseVector.size(); i++)
+  {
+    phaseVector[i] += angle;
+    while(phaseVector[i] < 0)
+    {
+      phaseVector[i] += 360;
+    }
+
+    while(phaseVector[i] >= 360)
+    {
+      phaseVector[i] -= 360;
+    }
+  }
+
+  return phaseVector;
+}

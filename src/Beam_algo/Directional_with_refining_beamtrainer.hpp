@@ -31,7 +31,8 @@ class Directional_with_refining_beamtrainer : public Directional_beamtrainer{
     {
       int x;
       int y;
-      double amp = 0.0;
+      //double amp = 0.0;
+      std::complex<double> amp = std::complex<double>(0, 0);
     };
     struct beamStruct bestBeam;
     bool bestBeamFlag = false;

@@ -44,7 +44,7 @@ void Directional_with_refining_beamtrainer::reset_Directional_with_refining_beam
 
   bestBeam.x = 0;
   bestBeam.y = 0;
-  bestBeam.amp = 0;
+  bestBeam.amp = std::complex<double>(0.0,0.0);
   bestBeamFlag = false;
 
   curCenterPhaseVector.clear();
@@ -60,14 +60,15 @@ const std::vector<int> Directional_with_refining_beamtrainer::getRespond(struct 
 
   if(beamSearchFlag)
   {
-    if(bestBeam.amp < recvData.avg_corr)
+    if(std::abs(bestBeam.amp) < recvData.avg_corr)
     {
       bestBeam.x = cur_angle_x;
       bestBeam.y = cur_angle_y;
-      bestBeam.amp = recvData.avg_corr;
+      bestBeam.amp = std::complex<double>(recvData.avg_i, recvData.avg_q);
       bestBeamFlag = true;
 
-      optimalPhaseVector = curPhaseVector;
+      optimalPhaseVector = beamPhaseShift(std::conj(bestBeam.amp), curPhaseVector);
+      optimal_available = true;
     }
 
     trainingPhaseVector = getNextBeam();
@@ -76,8 +77,6 @@ const std::vector<int> Directional_with_refining_beamtrainer::getRespond(struct 
 
     if((beamNum == 0)&&(bestBeamFlag))
     {
-      optimal_available = true;
-
       cur_center_x = bestBeam.x;
       cur_center_y = bestBeam.y;
 
@@ -88,14 +87,14 @@ const std::vector<int> Directional_with_refining_beamtrainer::getRespond(struct 
     }
   }else
   {
-    if(bestBeam.amp < recvData.avg_corr)
+    if(std::abs(bestBeam.amp) < recvData.avg_corr)
     {
       bestBeam.x = cur_angle_x;
       bestBeam.y = cur_angle_y;
-      bestBeam.amp = recvData.avg_corr;
+      bestBeam.amp = std::complex<double>(recvData.avg_i, recvData.avg_q);
       bestBeamFlag = true;
 
-      optimalPhaseVector = curPhaseVector;
+      optimalPhaseVector = beamPhaseShift(std::conj(bestBeam.amp), curPhaseVector);
       optimal_available = true;
     }
     trainingPhaseVector = getNextRefiningBeam();
