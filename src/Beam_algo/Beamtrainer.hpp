@@ -23,6 +23,8 @@ class Beamtrainer{
   protected:
     std::vector<int> genRandomWeight(void);
     void reset_Beamtrainer(void);
+    std::vector<int> beamPhaseShift(std::complex<double> angle, std::vector<int> phaseVector);
+    std::vector<int> beamPhaseShift(double angle, std::vector<int> phaseVector);
 
   public:
     virtual const std::vector<int> getRespond(struct average_corr_data recvData, std::vector<int> usedVector=curPhaseVector) = 0;
