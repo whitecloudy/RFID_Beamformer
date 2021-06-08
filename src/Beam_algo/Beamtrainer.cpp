@@ -88,11 +88,12 @@ std::vector<int> Beamtrainer::beamPhaseShift(std::complex<double> angle, std::ve
 {
   double angles = Rad2Deg(std::arg(angle));
 
-  beamPhaseShift(angles, phaseVector);
+  return beamPhaseShift(angles, phaseVector);
 }
 
 std::vector<int> Beamtrainer::beamPhaseShift(double angle, std::vector<int> phaseVector)
 {
+  std::cout << "\n\n"<<phaseVector.size()<<std::endl;
   for(int i = 0; i < phaseVector.size(); i++)
   {
     phaseVector[i] += angle;

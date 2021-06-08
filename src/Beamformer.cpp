@@ -106,6 +106,7 @@ int Beamformer::run_beamformer(void){
     /******************* SIC stage *******************/
     do
     {
+      std::cout << "SIC Phase" <<std::endl;
       if(stage_start(&data))
         return 0;
 
@@ -132,6 +133,9 @@ int Beamformer::run_beamformer(void){
     /******************* Signal stage *****************/
     do
     {
+      std::cout << "Signal Phase" <<std::endl;
+      if(status == BEAMFORMING)
+        std::cout << "BEAMFORMING" << std::endl;
       if(stage_start(&data))
         return 0;
 
@@ -146,8 +150,10 @@ int Beamformer::run_beamformer(void){
         if(sic_adjust_trigger_count == 0)
         {
           sic_adjust_trigger_count = SIC_ADJUST_THRESHOLD;
-          //SIC_adjustment();
-          SIC_handler(data);  //What if we put SIC handling here?
+          if(status != BEAMFORMING)
+            SIC_adjustment();
+          else
+            SIC_handler(data);  //What if we put SIC handling here?
         }
       }
 
@@ -403,7 +409,7 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
       status = TRAINING;
       status_count = training_round_max;
       BWtrainer->startTraining();
-      sic_ctrl->setTargetPower(std::complex<float>(0.0, 0.0));
+      sic_ctrl->setTargetPower(std::complex<float>(0.01, 0.0));
 
       weightVector = BWtrainer->getTrainingPhaseVector();
     }else if(status == TRAINING)
@@ -412,7 +418,7 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
       {
         status = BEAMFORMING;
         status_count = BEAMFORMING_ROUND;
-        sic_ctrl->setTargetPower(std::complex<float>(0.03, 0.0));
+        sic_ctrl->setTargetPower(std::complex<float>(0.02, 0.0));
         weightVector = BWtrainer->getOptimalPhaseVector();
       }else
       {
