@@ -12,6 +12,8 @@ Fixed_beamtrainer::Fixed_beamtrainer(int ant_num) : Beamtrainer(ant_num){
         std::cin >> curPhaseVector[i];
         std::cout << std::endl;
     }
+    this->trainingPhaseVector = this->curPhaseVector;
+    this->optimalPhaseVector[0] = this->curPhaseVector;
 }
 
 void Fixed_beamtrainer::printClassName(void){

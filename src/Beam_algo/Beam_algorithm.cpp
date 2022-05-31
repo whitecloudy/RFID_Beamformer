@@ -46,8 +46,13 @@ namespace BEAM_ALGO
         class_ptr = new Fixed_beamtrainer(ant_num);
         break;
       case AGENT:
-        class_ptr = new Agent_beamtrainer(ant_num);
-        break;
+        {
+          int maximum = 0;
+          std::cout << "How many beam? : ";
+          std::cin >> maximum;
+          class_ptr = new Agent_beamtrainer(ant_num, ant_array, maximum);
+          break;
+        }
       case TEST:
         class_ptr = new Test_beamtrainer(ant_num);
         break;

@@ -15,8 +15,10 @@ class Beamtrainer{
     bool isTraining = false;
     bool optimal_used = false;
     bool optimal_available = false;
+    int opt_number = 1;
+    int opt_cur = -1;
 
-    std::vector<int> optimalPhaseVector;
+    std::vector<std::vector<int>> optimalPhaseVector;
     std::vector<int> trainingPhaseVector;
     static std::vector<int> curPhaseVector;
 
@@ -34,7 +36,7 @@ class Beamtrainer{
     virtual void printClassName(void) = 0;
 
   public:
-    Beamtrainer(int ant_num);
+    Beamtrainer(int ant_num, int opt_number=1);
     const std::vector<int> getRandomWeight(void);
     const std::vector<int> getOptimalPhaseVector(void);
     const std::vector<int> getTrainingPhaseVector(void);
@@ -45,7 +47,7 @@ class Beamtrainer{
 
     virtual const int which_optimal(void)
     {
-      return 0;
+      return opt_cur;
     }
 };
 

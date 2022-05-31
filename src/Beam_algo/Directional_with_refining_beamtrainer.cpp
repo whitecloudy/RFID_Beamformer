@@ -67,7 +67,7 @@ const std::vector<int> Directional_with_refining_beamtrainer::getRespond(struct 
       bestBeam.amp = std::complex<double>(recvData.avg_i, recvData.avg_q);
       bestBeamFlag = true;
       
-      optimalPhaseVector = beamPhaseShift(std::conj(bestBeam.amp), curPhaseVector);
+      optimalPhaseVector[0] = beamPhaseShift(std::conj(bestBeam.amp), curPhaseVector);
       optimal_available = true;
     }
 
@@ -94,7 +94,7 @@ const std::vector<int> Directional_with_refining_beamtrainer::getRespond(struct 
       bestBeam.amp = std::complex<double>(recvData.avg_i, recvData.avg_q);
       bestBeamFlag = true;
 
-      optimalPhaseVector = beamPhaseShift(std::conj(bestBeam.amp), curPhaseVector);
+      optimalPhaseVector[0] = beamPhaseShift(std::conj(bestBeam.amp), curPhaseVector);
       optimal_available = true;
     }
     trainingPhaseVector = getNextRefiningBeam();

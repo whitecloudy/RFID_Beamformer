@@ -109,7 +109,7 @@ const std::vector<int> Directional_with_refining_beamtrainer2::getRespond(struct
 
     if(ca_cal.is_processable() && !optimal_used)
     {
-      optimalPhaseVector = ca_cal.processOptimalVector();
+      optimalPhaseVector[0] = ca_cal.processOptimalVector();
       optimal_available = true;
     }
 

@@ -106,7 +106,7 @@ const std::vector<int> CA_with_directional_beamtrainer::getRespond(struct averag
 
     if(ca_cal.is_processable() && !optimal_used)
     {
-      optimalPhaseVector = ca_cal.processOptimalVector();
+      optimalPhaseVector[0] = ca_cal.processOptimalVector();
       optimal_available = true;
     }
 

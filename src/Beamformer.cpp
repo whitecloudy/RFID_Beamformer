@@ -345,11 +345,6 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
   uint16_t tag_id = 0;
   std::vector<int> weightVector;
 
-  for(int i = 0; i<16; i++){
-    tag_id = tag_id << 1;
-    tag_id += data.RN16[i];
-  }
-
   /*************************Add algorithm here***************************/
 
   dataLogging(data, sic_ctrl->getPower(),  BWtrainer->isOptimalUsed(), BWtrainer->which_optimal());
@@ -365,13 +360,13 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
         tag_id = tag_id << 1;
         tag_id += data.RN16[i];
       }
-
       printf("Got RN16 : %x\n",tag_id);
       printf("avg corr : %f\n",data.avg_corr);
       printf("avg iq : %f, %f\n",data.avg_i, data.avg_q);
       printf("avg amp : %f, %f\n\n",data.cw_i, data.cw_q);
 
-      if(tag_id == PREDEFINED_RN16_)
+      //if(tag_id == PREDEFINED_RN16_)
+      if(true)
       {
         BWtrainer->getRespond(data);
       }
@@ -397,7 +392,8 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
     }else if(status == BEAMFORMING)
     {
       weightVector = BWtrainer->getOptimalPhaseVector();
-      needSIC = false;
+      needSIC = true;
+      //needSIC = false;
     }
   }else
   {

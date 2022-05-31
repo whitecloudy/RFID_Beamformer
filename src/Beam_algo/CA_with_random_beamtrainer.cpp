@@ -52,7 +52,7 @@ const std::vector<int> CA_with_random_beamtrainer::getRespond(struct average_cor
 
   if(ca_cal.is_processable())
   {
-    optimalPhaseVector = ca_cal.processOptimalVector();
+    optimalPhaseVector[0] = ca_cal.processOptimalVector();
     optimal_available = true;
   }
 
