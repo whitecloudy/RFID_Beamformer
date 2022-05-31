@@ -42,7 +42,14 @@ int Beamformer::stage_finish(void)
 {
   phase_ctrl->data_apply();
 
-  if(ipc.send_ack(needSIC) == -1)
+  int send_bits = 0;
+  if(needSIC)
+    send_bits |= 0x01;
+
+  if(status == BEAMFORMING)
+    send_bits |= 0x02;
+
+  if(ipc.send_ack(send_bits) == -1)
   {
     return 1;
   }
@@ -324,7 +331,6 @@ int Beamformer::SIC_handler(const struct average_corr_data & data){
   phase_ctrl->phase_control(SIC_PORT_NUM_, sic_ctrl->getPower(), cur_weights[SIC_PORT_NUM_]); //change phase and power
   sic_ctrl->setPower(idx2dB(dB2idx(sic_ctrl->getPower())));
   sic_ctrl->setPhase(cur_weights[SIC_PORT_NUM_]);
-
 
   needSIC = false;
   return 0;
