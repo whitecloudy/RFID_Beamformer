@@ -29,7 +29,11 @@ class Agent_communicator{
     int max_num;
     bool opt_flag = false;
 
-    std::vector<int> nn_opt_data, heur_opt_data;
+    std::vector<int> 
+      nn_opt_data, 
+      heur_opt_data,
+      mmse_opt_data,
+      dir_opt_data;
 
 
   public:
@@ -43,6 +47,8 @@ class Agent_communicator{
 
     std::vector<int> get_nn_opt(void);
     std::vector<int> get_heur_opt(void);
+    std::vector<int> get_mmse_opt(void);
+    std::vector<int> get_dir_opt(void);
 
     int send_end(void);
 };

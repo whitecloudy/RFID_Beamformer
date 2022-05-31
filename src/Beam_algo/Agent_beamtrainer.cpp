@@ -109,6 +109,8 @@ int Agent_communicator::send_data(std::vector<int> phase_vec, float tag_i, float
     std::cout << "<<<<<<<<<<<<<<<<<<<<<<< Let's Recv Channel! >>>>>>>>>>>>>>>>>>>>>>>"<<std::endl;
     nn_opt_data = recv_data_converter(recv_data());
     heur_opt_data =  recv_data_converter(recv_data());
+    mmse_opt_data =  recv_data_converter(recv_data());
+    dir_opt_data =  recv_data_converter(recv_data());
 
     std::cout << "Done"<<std::endl;
     opt_flag = true;
@@ -194,13 +196,25 @@ std::vector<int> Agent_communicator::get_heur_opt(void)
 }
 
 
+std::vector<int> Agent_communicator::get_mmse_opt(void)
+{
+  return mmse_opt_data;
+}
+
+
+std::vector<int> Agent_communicator::get_dir_opt(void)
+{
+  return dir_opt_data;
+}
+
+
 Agent_beamtrainer::Agent_beamtrainer(int ant_num, std::vector<int> ant_array, int actual_round, int round_max) : Directional_beamtrainer(ant_num, ant_array), curCenterPhaseVector(ant_num), comm(actual_round)
 {
   this->round_max = round_max;
   this->best_beam_max = 3;
 
-  opt_number = 2;
-  optimalPhaseVector.resize(2);
+  opt_number = 4;
+  optimalPhaseVector.resize(opt_number);
 }
 
 void Agent_beamtrainer::printClassName(void){
@@ -297,6 +311,9 @@ const std::vector<int> Agent_beamtrainer::getRespond(struct average_corr_data re
     {
       optimalPhaseVector[0] = comm.get_nn_opt();
       optimalPhaseVector[1] = comm.get_heur_opt();
+      optimalPhaseVector[2] = comm.get_mmse_opt();
+      optimalPhaseVector[3] = comm.get_dir_opt();
+
       optimal_available = true;
     }
 
