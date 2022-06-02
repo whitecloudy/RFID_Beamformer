@@ -3,6 +3,7 @@
 #include <random>
 #include <fstream>
 #include <sys/time.h>
+#include <cassert>
 
 #define __COLLECT_DATA__
 //#define __TIME_STAMP__
@@ -361,10 +362,17 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
   {
     if(data.successFlag == _SUCCESS)
     {
-      for(int i = 0; i<16; i++)
+      if(data.data_flag == 0)
       {
-        tag_id = tag_id << 1;
-        tag_id += data.RN16[i];
+        for(int i = 0; i<16; i++)
+        {
+          tag_id = tag_id << 1;
+          tag_id += data.data_bits[i];
+        }
+      }else
+      {
+        std::cerr << "Why not receive RN16 at TRAINING section?"<<std::endl;
+        assert(data.data_flag == 0);
       }
       printf("Got RN16 : %x\n",tag_id);
       printf("avg corr : %f\n",data.avg_corr);
@@ -454,11 +462,27 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
 
 
 int Beamformer::dataLogging(const struct average_corr_data & data, double sic_power, bool optimal, const int which_op){
-  uint16_t tag_id = 0;
+  uint32_t tag_id = 0;
 
-  for(int i = 0; i<16; i++){
-    tag_id = tag_id << 1;
-    tag_id += data.RN16[i];
+  if(data.data_flag == 0) //RN16
+  {
+    for(int i = 0; i<16; i++)
+    {
+      tag_id = tag_id << 1;
+      tag_id += data.data_bits[i];
+    }
+  }else if(data.data_flag == 1) //EPC 128bit
+  {
+    for(int i = 0; i<32; i++)
+    {
+      tag_id = tag_id << 1;
+      tag_id += data.data_bits[i];
+    }
+  }
+  else
+  {
+    std::cerr << "Wrong data flag"<<std::endl;
+    assert(data.data_flag == 0);
   }
 
   if(data.successFlag == _SUCCESS){
