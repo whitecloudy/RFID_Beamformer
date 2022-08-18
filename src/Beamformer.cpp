@@ -72,7 +72,7 @@ int Beamformer::run_beamformer(void){
   if(stage_finish())
     return 0;
 
-  int sic_measure_count = 5;
+  int sic_measure_count = 10;
   std::complex<float> avg_cw(0.0, 0.0);
   do
   {
@@ -81,27 +81,27 @@ int Beamformer::run_beamformer(void){
 
     if(data.successFlag != _GATE_FAIL)
     {
-      if(sic_measure_count > 0)
-      {
-        std::cout << std::complex<float>(data.cw_i, data.cw_q) << std::endl;
+      std::cout << std::complex<float>(data.cw_i, data.cw_q) << std::endl;
 
-        avg_cw += std::complex<float>(data.cw_i, data.cw_q);
-      }else{
-        avg_cw /= 5;
+      avg_cw += std::complex<float>(data.cw_i, data.cw_q);
+
+      sic_measure_count -= 1;
+
+      if(sic_measure_count == 0)
+      {
+        avg_cw /= 10;
 
         std::cout << avg_cw << std::endl;
         sic_ctrl = std::unique_ptr<SIC_controller>(new SIC_controller(avg_cw));
         SIC_port_measure_over();
       }
-
-      sic_measure_count -= 1;
     }
 
     //initial phase here
     if(stage_finish())
       return 0;
     std::cout << "Getting Ready" << std::endl;
-  }while(data.successFlag == _GATE_FAIL || sic_measure_count >= 0);
+  }while(data.successFlag == _GATE_FAIL || sic_measure_count > 0);
 
 
   /*****************************************************/
@@ -126,6 +126,7 @@ int Beamformer::run_beamformer(void){
       }
       else
       {
+        std::cout << "SIC adjust"<<std::endl;
         SIC_adjustment();
       }
 
@@ -339,7 +340,7 @@ int Beamformer::SIC_handler(const struct average_corr_data & data){
 
 int Beamformer::SIC_adjustment(void)
 {
-  needSIC = false;
+  //needSIC = false;
   sic_ctrl->setPower(sic_ctrl->getPower() + 0.1);
   phase_ctrl->phase_control(SIC_PORT_NUM_, sic_ctrl->getPower(), sic_ctrl->getPhase());
 
@@ -428,7 +429,7 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
       {
         status = BEAMFORMING;
         status_count = BEAMFORMING_ROUND;
-        sic_ctrl->setTargetPower(std::complex<float>(0.02, 0.0));
+        sic_ctrl->setTargetPower(std::complex<float>(0.01, 0.0));
         weightVector = BWtrainer->getOptimalPhaseVector();
       }else
       {
@@ -464,28 +465,30 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
 int Beamformer::dataLogging(const struct average_corr_data & data, double sic_power, bool optimal, const int which_op){
   uint32_t tag_id = 0;
 
-  if(data.data_flag == 0) //RN16
-  {
-    for(int i = 0; i<16; i++)
-    {
-      tag_id = tag_id << 1;
-      tag_id += data.data_bits[i];
-    }
-  }else if(data.data_flag == 1) //EPC 128bit
-  {
-    for(int i = 0; i<32; i++)
-    {
-      tag_id = tag_id << 1;
-      tag_id += data.data_bits[i];
-    }
-  }
-  else
-  {
-    std::cerr << "Wrong data flag"<<std::endl;
-    assert(data.data_flag == 0);
-  }
 
   if(data.successFlag == _SUCCESS){
+    if(data.data_flag == 0) //RN16
+    {
+      for(int i = 0; i<16; i++)
+      {
+        tag_id = tag_id << 1;
+        tag_id += data.data_bits[i];
+      }
+    }else if(data.data_flag == 1) //EPC 128bit
+    {
+      for(int i = 0; i<32; i++)
+      {
+        tag_id = tag_id << 1;
+        tag_id += data.data_bits[i];
+      }
+    }
+    else
+    {
+      std::cerr << "Wrong data flag"<<std::endl;
+      std::cerr << (unsigned int)data.data_flag << std::endl;
+      assert(data.data_flag == 0);
+    }
+
     if(optimal)
     {
       for(int i = 0; i<ant_amount;i++){

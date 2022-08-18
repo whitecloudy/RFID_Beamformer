@@ -57,13 +57,13 @@ Calibration::Calibration(int ant_num, int resolution)
 
 std::complex<double> Calibration::getMeasureData(void)
 {
-  uint8_t data = 1;
+  uint8_t data = 0;
   comm.sendData(client_fd,&data, sizeof(uint8_t));
 
   uint8_t dataBuffer[32];
   int recv_len = comm.readData(client_fd, dataBuffer, 32);
 
-  if(recv_len == 24)
+  if(recv_len == 16)
   {
     return decodeData(dataBuffer);
   }else
@@ -80,13 +80,19 @@ std::complex<double> Calibration::decodeData(uint8_t dataBuffer[])
   int64_t imag_significand = 0;
   int32_t imag_exponent = 0;
 
-  memcpy(&real_significand, dataBuffer, 8);
-  memcpy(&real_exponent, dataBuffer + 8, 4);
-  memcpy(&imag_significand, dataBuffer + 12, 8);
-  memcpy(&imag_exponent, dataBuffer + 20, 4);
+  //memcpy(&real_significand, dataBuffer, 8);
+  //memcpy(&real_exponent, dataBuffer + 8, 4);
+  //memcpy(&imag_significand, dataBuffer + 12, 8);
+  //memcpy(&imag_exponent, dataBuffer + 20, 4);
 
-  double real = real_significand / 1.0e15 * exp2(real_exponent);
-  double imag = imag_significand / 1.0e15 * exp2(imag_exponent);
+  //double real = real_significand / 1.0e15 * exp2(real_exponent);
+  //double imag = imag_significand / 1.0e15 * exp2(imag_exponent);
+
+  double real = 0;
+  double imag = 0;
+
+  memcpy(&real, dataBuffer, 8);
+  memcpy(&imag, dataBuffer+8, 8);
 
   std::complex<double> recv_data(real, imag);
 
@@ -132,10 +138,10 @@ int Calibration::process(void)
     std::cout <<voltage << " : "<<measured_data<<std::endl;
   }
 
-  V.voltage_modify(attenuator_num, 10.0);
+  V.voltage_modify(attenuator_num, 0.0);
   V.voltage_modify(phase_num, 0.0);
   V.data_apply();
-  usleep(1e5);
+  sleep(5);
   reference_data = getMeasureData();
 
   for(int step = 0; step < resolution; step++)
@@ -148,6 +154,9 @@ int Calibration::process(void)
     attenuator_measured_data[step] = measured_data;
     std::cout <<voltage << " : "<<measured_data<<std::endl;
   }
+
+  uint8_t data = 1;
+  comm.sendData(client_fd, &data, sizeof(uint8_t));
 
   return 0;
 }

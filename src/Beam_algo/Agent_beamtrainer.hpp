@@ -17,6 +17,7 @@
 #include <netinet/in.h> 
 
 #define MAXIMUM_DATA (4092)
+#define PORT (11045)
 
 class Agent_communicator{
   private:
@@ -37,7 +38,7 @@ class Agent_communicator{
 
 
   public:
-    Agent_communicator(int num);
+    Agent_communicator(int num, int port=PORT);
     ~Agent_communicator();
   
     int send_data(std::vector<int> phase_vec, float tag_i, float tag_q, float noise_i, float noise_q);

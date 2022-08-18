@@ -4,7 +4,7 @@
 #define ANT_num   (16)
 #define MIN_POWER (-22.0)
 #define MAX_POWER (-2.0)
-#define DEFAULT_POWER (MAX_POWER)
+#define DEFAULT_POWER (-3)
 
 #define PI (3.1415926535897)
 

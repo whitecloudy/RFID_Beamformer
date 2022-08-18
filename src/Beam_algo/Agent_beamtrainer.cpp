@@ -4,11 +4,10 @@
 #include <ctime>
 
 #define __SCRAMBLE_VAR      (30)
-#define PORT (11045)
 
 using namespace std::complex_literals;
 
-Agent_communicator::Agent_communicator(int num) : max_num(num), counter(0)
+Agent_communicator::Agent_communicator(int num, int port) : max_num(num), counter(0)
 {
   if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { 
     perror("socket creation failed"); 
@@ -19,10 +18,10 @@ Agent_communicator::Agent_communicator(int num) : max_num(num), counter(0)
 
   servaddr.sin_family = AF_INET; 
   servaddr.sin_port = htons(PORT); 
-  servaddr.sin_addr.s_addr = inet_addr("115.145.179.168"); 
+  servaddr.sin_addr.s_addr = inet_addr("115.145.172.98"); 
 
   cliaddr.sin_family = AF_INET;
-  cliaddr.sin_port = htons(PORT);
+  cliaddr.sin_port = htons(port);
   cliaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
   if(bind(sockfd, (struct sockaddr *)&cliaddr, sizeof(cliaddr)) < 0){
@@ -213,7 +212,7 @@ Agent_beamtrainer::Agent_beamtrainer(int ant_num, std::vector<int> ant_array, in
   this->round_max = round_max;
   this->best_beam_max = 3;
 
-  opt_number = 4;
+  opt_number = 5;
   optimalPhaseVector.resize(opt_number);
 }
 
@@ -271,7 +270,6 @@ const std::vector<int> Agent_beamtrainer::getRespond(struct average_corr_data re
 
         break;
       }
-
     }
 
     if(!optimal_used)
@@ -313,6 +311,7 @@ const std::vector<int> Agent_beamtrainer::getRespond(struct average_corr_data re
       optimalPhaseVector[1] = comm.get_heur_opt();
       optimalPhaseVector[2] = comm.get_mmse_opt();
       optimalPhaseVector[3] = comm.get_dir_opt();
+      optimalPhaseVector[4] = curCenterPhaseVector;
 
       optimal_available = true;
     }
