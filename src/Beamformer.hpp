@@ -16,7 +16,7 @@
 #include <fstream>
 #include <memory>
 
-#define BEAMFORMING_ROUND (20)
+#define BEAMFORMING_ROUND (70)
 #define SIC_ADJUST_THRESHOLD (3)
 
 class Beamformer{

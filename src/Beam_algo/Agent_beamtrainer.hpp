@@ -63,7 +63,7 @@ class Agent_beamtrainer : public Directional_beamtrainer{
 
     bool beamSearchFlag = true;
 
-    Agent_communicator comm;
+    Agent_communicator comm6, comm8, comm10, comm12;
 
     struct beamStruct
     {

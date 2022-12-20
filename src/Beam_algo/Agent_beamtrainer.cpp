@@ -17,7 +17,7 @@ Agent_communicator::Agent_communicator(int num, int port) : max_num(num), counte
   memset(&servaddr, 0, sizeof(servaddr)); 
 
   servaddr.sin_family = AF_INET; 
-  servaddr.sin_port = htons(PORT); 
+  servaddr.sin_port = htons(port); 
   servaddr.sin_addr.s_addr = inet_addr("115.145.172.98"); 
 
   cliaddr.sin_family = AF_INET;
@@ -207,12 +207,12 @@ std::vector<int> Agent_communicator::get_dir_opt(void)
 }
 
 
-Agent_beamtrainer::Agent_beamtrainer(int ant_num, std::vector<int> ant_array, int actual_round, int round_max) : Directional_beamtrainer(ant_num, ant_array), curCenterPhaseVector(ant_num), comm(actual_round)
+Agent_beamtrainer::Agent_beamtrainer(int ant_num, std::vector<int> ant_array, int actual_round, int round_max) : Directional_beamtrainer(ant_num, ant_array), curCenterPhaseVector(ant_num), comm6(6, 11045), comm8(8, 11047), comm10(10, 11049), comm12(12, 11051)
 {
   this->round_max = round_max;
   this->best_beam_max = 3;
 
-  opt_number = 5;
+  opt_number = 14;
   optimalPhaseVector.resize(opt_number);
 }
 
@@ -240,7 +240,10 @@ void Agent_beamtrainer::reset_Agent_beamtrainer(void)
   round_count = 0;
   best_beam_count = 0;
 
-  comm.reset();
+  comm6.reset();
+  comm8.reset();
+  comm10.reset();
+  comm12.reset();
 
   rankBeamL.clear();
   bestBeamNum.clear();
@@ -255,7 +258,6 @@ void Agent_beamtrainer::reset_Agent_beamtrainer(void)
  *  Handle the tag's respond
  */
 const std::vector<int> Agent_beamtrainer::getRespond(struct average_corr_data recvData, std::vector<int> usedVector){
-
   if(beamSearchFlag)
   {
     for (auto beamIter = rankBeamL.begin(); true; beamIter++)
@@ -302,16 +304,33 @@ const std::vector<int> Agent_beamtrainer::getRespond(struct average_corr_data re
   {
     if(!optimal_used)
     {
-      comm.send_data(usedVector, recvData.avg_i, recvData.avg_q, recvData.stddev_i, recvData.stddev_q);
+      comm6.send_data(usedVector, recvData.avg_i, recvData.avg_q, recvData.stddev_i, recvData.stddev_q);
+      comm8.send_data(usedVector, recvData.avg_i, recvData.avg_q, recvData.stddev_i, recvData.stddev_q);
+      comm10.send_data(usedVector, recvData.avg_i, recvData.avg_q, recvData.stddev_i, recvData.stddev_q);
+      comm12.send_data(usedVector, recvData.avg_i, recvData.avg_q, recvData.stddev_i, recvData.stddev_q);
     }
 
-    if(comm.is_opt_ready() && !optimal_used)
+    if((comm6.is_opt_ready() && comm8.is_opt_ready() && comm10.is_opt_ready() && comm12.is_opt_ready()) && !optimal_used)
     {
-      optimalPhaseVector[0] = comm.get_nn_opt();
-      optimalPhaseVector[1] = comm.get_heur_opt();
-      optimalPhaseVector[2] = comm.get_mmse_opt();
-      optimalPhaseVector[3] = comm.get_dir_opt();
-      optimalPhaseVector[4] = curCenterPhaseVector;
+      optimalPhaseVector[0] = comm6.get_nn_opt();
+      optimalPhaseVector[1] = comm6.get_heur_opt();
+      optimalPhaseVector[2] = comm6.get_mmse_opt();
+      optimalPhaseVector[3] = comm8.get_nn_opt();
+      optimalPhaseVector[4] = comm8.get_heur_opt();
+      optimalPhaseVector[5] = comm8.get_mmse_opt();
+      optimalPhaseVector[6] = comm10.get_nn_opt();
+      optimalPhaseVector[7] = comm10.get_heur_opt();
+      optimalPhaseVector[8] = comm10.get_mmse_opt();
+      optimalPhaseVector[9] = comm12.get_nn_opt();
+      optimalPhaseVector[10] = comm12.get_heur_opt();
+      optimalPhaseVector[11] = comm12.get_mmse_opt();
+      optimalPhaseVector[12] = comm12.get_dir_opt();
+      optimalPhaseVector[13] = curCenterPhaseVector;
+
+      comm6.reset();
+      comm8.reset();
+      comm10.reset();
+      comm12.reset();
 
       optimal_available = true;
     }
