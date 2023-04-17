@@ -15,14 +15,15 @@ CA_calculator::CA_calculator(int ant_num, int ML_Ratio) : ant_num(ant_num), ML_n
 int CA_calculator::setNewTrainingVector(std::vector<int> trainingVector)
 {
   std::cout << "setNew Training : "<< W_Mat.n_rows << ", " << avgCorrColumn.n_rows<<std::endl;
-
+  
   arma::Row<std::complex<double>> beamWeight(ant_num);
-
+  
   for(int i = 0; i<ant_num; i++)
   {
     beamWeight(i) = beam_util::phase2NormalComplex(trainingVector[i]);
   }
 
+  /*
   for(int i = 0; i<W_Mat.n_rows ; i++)
   {
     if(arma::approx_equal(W_Mat.row(i), beamWeight, "reldiff",0.01))
@@ -31,7 +32,7 @@ int CA_calculator::setNewTrainingVector(std::vector<int> trainingVector)
       avgCorrColumn.shed_row(i);
     }
   }
-  
+  */
   if(W_Mat.n_rows == ML_num)
   {
     W_Mat.shed_row(0);
