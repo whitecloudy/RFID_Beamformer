@@ -11,6 +11,8 @@
 #define PREDEFINED_RN16_ (0x5555)
 #define EXPECTED_TAG_NUM_ (1)
 
+#define THRESHOLD_FOR_PERFECT_ (11500)
+
 #define SIC_PORT_NUM_ ant_nums[ant_amount-1]
 
 
@@ -102,11 +104,7 @@ int Beamformer::run_beamformer(void){
       return 0;
     std::cout << "Getting Ready" << std::endl;
   }while(data.successFlag == _GATE_FAIL || sic_measure_count > 0);
-
-
   /*****************************************************/
-
-
 
   std::cout << "READY"<<std::endl;
   //loop until it is over
@@ -276,6 +274,7 @@ int Beamformer::vector2cur_weights(std::vector<int> weightVector){
   for(int i = 0; i<ant_amount-1;i++){
     cur_weights[ant_nums[i]] = weightVector[i];
   }
+  curWeightVector = weightVector;
   return 0;
 }
 
@@ -354,8 +353,10 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
   std::vector<int> weightVector;
 
   /*************************Add algorithm here***************************/
-
-  dataLogging(data, sic_ctrl->getPower(),  BWtrainer->isOptimalUsed(), BWtrainer->which_optimal());
+  if(perfect_flag)
+    dataLogging(data, sic_ctrl->getPower(),  true, 99);
+  else
+    dataLogging(data, sic_ctrl->getPower(),  BWtrainer->isOptimalUsed(), BWtrainer->which_optimal());
 
   counter++;
 
@@ -384,6 +385,11 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
       if(true)
       {
         BWtrainer->getRespond(data);
+        if(tag_id == PREDEFINED_RN16_)
+        {
+          data_stack.push_back(data);
+          weight_stack.push_back(curWeightVector);
+        }
       }
       else
       {
@@ -396,7 +402,7 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
     needSIC = true;
   }
 
-  if(status_count > 1)
+  if(status_count > 1)  //yet we still need to maintain current status
   {
     status_count -= 1;
 
@@ -406,16 +412,21 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
       needSIC = true;
     }else if(status == BEAMFORMING)
     {
-      weightVector = BWtrainer->getOptimalPhaseVector();
-      needSIC = true;
-      //needSIC = false;
+      if(perfect_flag)
+      {
+        weightVector = perfectVector;
+        needSIC = false;
+      }else
+      {
+        weightVector = BWtrainer->getOptimalPhaseVector();
+        needSIC = true;
+      }
     }
-  }else
+  }else //switch status triggered
   {
     needSIC = true;
     if(status == BEAMFORMING)
     {
-
       beamforming_count += 1;
       status = TRAINING;
       status_count = training_round_max;
@@ -424,20 +435,59 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
 
       weightVector = BWtrainer->getTrainingPhaseVector();
     }else if(status == TRAINING)
-    {
-      if(BWtrainer->isOptimalCalculated())
+    { 
+      if(data.round >= THRESHOLD_FOR_PERFECT_)
       {
-        status = BEAMFORMING;
-        status_count = BEAMFORMING_ROUND;
-        sic_ctrl->setTargetPower(std::complex<float>(0.01, 0.0));
-        weightVector = BWtrainer->getOptimalPhaseVector();
+        /***************** Perfect training phase start ******************/
+        if(perfect_flag || data_stack.size() >= 50)
+        {
+          std::cout <<weight_stack.size() << std::endl;
+          if(perfectVector.size() == 0)
+          {
+            CA_calculator ca_cal(ant_amount-1, (int)data_stack.size()/(ant_amount-1));
+
+            for(int i = 0; i < data_stack.size(); i++)
+            {
+              ca_cal.setNewTrainingVector(weight_stack[i]);
+              ca_cal.setNewCorrData(std::complex<double>(data_stack[i].avg_i, data_stack[i].avg_q));
+            }
+            perfectVector = ca_cal.processOptimalVector();
+            perfect_flag = true;
+
+          }
+          status = BEAMFORMING;
+          status_count = 0xFFFF;  //write max
+          sic_ctrl->setTargetPower(std::complex<float>(0.01, 0.0));
+          weightVector = perfectVector;
+        }else
+        {
+          /***************** Not enough training data ******************/
+          beamforming_count += 1;
+          status = TRAINING;
+          status_count = training_round_max;
+          BWtrainer->startTraining();
+          sic_ctrl->setTargetPower(std::complex<float>(0.01, 0.0));
+
+          weightVector = BWtrainer->getTrainingPhaseVector();
+        }
       }else
       {
-        beamforming_count += 1;
-        status = TRAINING;
-        status_count = training_round_max;
-        BWtrainer->startTraining();
-        weightVector = BWtrainer->getTrainingPhaseVector();
+        if(BWtrainer->isOptimalCalculated())
+        {
+          /***************** Start Optimal phase ******************/
+          status = BEAMFORMING;
+          status_count = BEAMFORMING_ROUND;
+          sic_ctrl->setTargetPower(std::complex<float>(0.01, 0.0));
+          weightVector = BWtrainer->getOptimalPhaseVector();
+        }else
+        {
+          /***************** Back to Training stage ******************/
+          beamforming_count += 1;
+          status = TRAINING;
+          status_count = training_round_max;
+          BWtrainer->startTraining();
+          weightVector = BWtrainer->getTrainingPhaseVector();
+        }
       }
     }
   }

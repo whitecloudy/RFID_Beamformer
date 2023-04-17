@@ -9,6 +9,7 @@
 #include "lib/SIC/SIC_controller.hpp"
 #include "lib/Reader_comm/IPC_controller.hpp"
 #include "global/struct_global.hpp"
+#include "Beam_algo/common/CA_calculator.hpp"
 #include <iostream>
 #include <string>
 #include <cstdio>
@@ -46,6 +47,13 @@ class Beamformer{
     int cur_weights[ANT_num] = {};  //TODO : change this more neet way
 
     int counter = 0;
+
+    bool perfect_flag = false;
+
+    std::vector<int> perfectVector;
+    std::vector<int> curWeightVector;
+    std::vector<std::vector<int>> weight_stack;
+    std::vector<average_corr_data> data_stack;
     
 
   private:

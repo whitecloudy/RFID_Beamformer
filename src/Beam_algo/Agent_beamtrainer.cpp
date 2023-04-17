@@ -100,7 +100,7 @@ int Agent_communicator::send_data(std::vector<int> phase_vec, float tag_i, float
     send_data += ',';
     send_data += std::to_string(noise_q);
     
-    int result = sendto(sockfd, send_data.c_str(), send_data.size()+1, MSG_CONFIRM, (const struct sockaddr *)&servaddr, sizeof(servaddr));
+    int result = sendto(sockfd, send_data.c_str(), send_data.size(), MSG_CONFIRM, (const struct sockaddr *)&servaddr, sizeof(servaddr));
     counter+=1;
   }
   if(counter == max_num)
@@ -258,10 +258,11 @@ void Agent_beamtrainer::reset_Agent_beamtrainer(void)
  *  Handle the tag's respond
  */
 const std::vector<int> Agent_beamtrainer::getRespond(struct average_corr_data recvData, std::vector<int> usedVector){
-  if(beamSearchFlag)
-  {
+  if(beamSearchFlag)  //We used directional beam
+  { 
     for (auto beamIter = rankBeamL.begin(); true; beamIter++)
     {
+      //stack directional beams by amplitude order
       if(((*beamIter).amp < recvData.avg_corr)||(beamIter == rankBeamL.end()))
       {
         struct beamStruct tmpData;
@@ -282,6 +283,7 @@ const std::vector<int> Agent_beamtrainer::getRespond(struct average_corr_data re
 
     int beamNum = getBeamNum();
 
+    //When we done searching with center Beam
     if((beamNum == 0)&&(rankBeamL.size() != 0))
     {
       round_count = round_max;
@@ -325,7 +327,7 @@ const std::vector<int> Agent_beamtrainer::getRespond(struct average_corr_data re
       optimalPhaseVector[10] = comm12.get_heur_opt();
       optimalPhaseVector[11] = comm12.get_mmse_opt();
       optimalPhaseVector[12] = comm12.get_dir_opt();
-      optimalPhaseVector[13] = curCenterPhaseVector;
+      optimalPhaseVector[13] = beamNum2phaseVec(bestBeamNum[0]);
 
       comm6.reset();
       comm8.reset();
