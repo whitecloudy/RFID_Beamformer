@@ -1,15 +1,26 @@
 #include "CA_calculator.hpp"
+#include <cassert>
 
 #define GAIN (1)
 
 
-CA_calculator::CA_calculator(int ant_num, int ML_Ratio) : ant_num(ant_num), ML_num(ant_num * ML_Ratio)
+CA_calculator::CA_calculator(int ant_num, int ML_Ratio) : ant_num(ant_num)
 {
-  if(ML_Ratio == 0)
-  {
-    ML_num = ant_num * 100;
-  }
   clear();
+}
+
+int CA_calculator::setNewData(std::vector<int> trainingVector, std::complex<double> corrData)
+{
+  int W_num = setNewTrainingVector(trainingVector);
+  int a_num = setNewCorrData(corrData);
+
+  if(W_num != a_num)
+  {
+    std::cerr << "W matrix and a matrix is not match!" << std::endl;
+    assert(W_num == a_num);
+  }
+
+  return W_num;
 }
 
 int CA_calculator::setNewTrainingVector(std::vector<int> trainingVector)
@@ -23,30 +34,7 @@ int CA_calculator::setNewTrainingVector(std::vector<int> trainingVector)
     beamWeight(i) = beam_util::phase2NormalComplex(trainingVector[i]);
   }
 
-  /*
-  for(int i = 0; i<W_Mat.n_rows ; i++)
-  {
-    if(arma::approx_equal(W_Mat.row(i), beamWeight, "reldiff",0.01))
-    {
-      W_Mat.shed_row(i);
-      avgCorrColumn.shed_row(i);
-    }
-  }
-  */
-  if(W_Mat.n_rows == ML_num)
-  {
-    W_Mat.shed_row(0);
-    avgCorrColumn.shed_row(0);
-
-    W_Mat.insert_rows(W_Mat.n_rows, beamWeight);
-  }else if(W_Mat.n_rows < ML_num)
-  {
-    W_Mat.insert_rows(W_Mat.n_rows, beamWeight);
-  }else
-  {
-    std::cerr << "Training Weight Matrix Error"<<std::endl;
-    exit(1);
-  }
+  W_Mat.insert_rows(W_Mat.n_rows, beamWeight);
 
   return W_Mat.n_rows;
 }

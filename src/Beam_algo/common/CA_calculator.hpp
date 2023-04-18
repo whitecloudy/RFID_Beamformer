@@ -5,10 +5,10 @@
 #include <armadillo>
 #include "Beam_util.hpp"
 
+
 class CA_calculator{
   private:
     int ant_num;
-    int ML_num;
 
     bool First = true;
 
@@ -21,6 +21,8 @@ class CA_calculator{
 
   public:
     CA_calculator(int ant_num, int ML_Ratio = 1);
+
+    int setNewData(std::vector<int> trainingVector, std::complex<double> corrData);
 
     int setNewTrainingVector(std::vector<int> trainingVector);
     int setNewCorrData(std::complex<double> corrData);
