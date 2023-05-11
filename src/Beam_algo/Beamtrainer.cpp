@@ -15,8 +15,6 @@ Beamtrainer::Beamtrainer(int ant_num, int opt_number)
 
   optimalPhaseVector.resize(opt_number);
 
-  for(int i=0; i<opt_number;i++)
-    optimalPhaseVector[i].resize(ant_num);
   curPhaseVector.resize(ant_num);
 }
 
@@ -45,7 +43,8 @@ void Beamtrainer::reset_Beamtrainer(void)
 {
   optimal_used = false;
   optimal_available = false;
-  opt_cur = -1;
+  //opt_cur = -1;
+  opt_cur = opt_number;
 
   for(int i = 0; i<opt_number; i++)
   {
@@ -82,7 +81,12 @@ const bool Beamtrainer::isOptimalUsed(void){
 
 const std::vector<int> Beamtrainer::getOptimalPhaseVector(void){
   optimal_used = true;
-  opt_cur = (opt_cur + 1)%opt_number;
+  //opt_cur = (opt_cur + 1)%opt_number;
+  opt_cur-=1;
+  if(opt_cur < 0)
+  {
+    opt_cur = opt_number - 1;
+  }
   curPhaseVector = optimalPhaseVector[opt_cur];
   return curPhaseVector;
 }
