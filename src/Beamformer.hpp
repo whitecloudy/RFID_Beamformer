@@ -17,7 +17,7 @@
 #include <fstream>
 #include <memory>
 
-#define BEAMFORMING_ROUND (70)
+#define BEAMFORMING_ROUND (40)
 #define SIC_ADJUST_THRESHOLD (3)
 
 class Beamformer{
@@ -26,6 +26,16 @@ class Beamformer{
     TRAINING,
     BEAMFORMING
   } status = TRAINING;
+
+  struct phase_amp_dataset
+  {
+    std::vector<int> phase;
+    std::complex<float> amp;
+
+    public:
+      phase_amp_dataset(std::vector<int> phase_, average_corr_data data_);
+      phase_amp_dataset(std::vector<int> phase_, std::complex<float> amp_);
+  };
 
   int status_count;
   int beamforming_count = 0;
@@ -47,13 +57,17 @@ class Beamformer{
     int cur_weights[ANT_num] = {};  //TODO : change this more neet way
 
     int counter = 0;
+    int opt_repeat_counter = 0;
 
     bool perfect_flag = false;
 
-    std::vector<int> perfectVector;
+    int perfect_i = 0;
+    std::vector<int> perfectVector_l[6];
     std::vector<int> curWeightVector;
-    std::vector<std::vector<int>> weight_stack;
-    std::vector<average_corr_data> data_stack;
+    //std::vector<std::vector<int>> weight_stack;
+    //std::vector<average_corr_data> data_stack;
+
+    std::vector<struct phase_amp_dataset> weight_amp_stack;
     
 
   private:

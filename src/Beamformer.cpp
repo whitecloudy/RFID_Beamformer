@@ -5,6 +5,7 @@
 #include <sys/time.h>
 #include <cassert>
 
+
 #define __COLLECT_DATA__
 //#define __TIME_STAMP__
 
@@ -14,6 +15,8 @@
 #define THRESHOLD_FOR_PERFECT_ (11500)
 
 #define SIC_PORT_NUM_ ant_nums[ant_amount-1]
+
+#define REPEAT_COUNT_ (10)
 
 
 double normal_random(double mean, double std_dev){
@@ -354,7 +357,7 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
 
   /*************************Add algorithm here***************************/
   if(perfect_flag)
-    dataLogging(data, sic_ctrl->getPower(),  true, 99);
+    dataLogging(data, sic_ctrl->getPower(),  true, 90+perfect_i);
   else
     dataLogging(data, sic_ctrl->getPower(),  BWtrainer->isOptimalUsed(), BWtrainer->which_optimal());
 
@@ -381,14 +384,15 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
       printf("avg iq : %f, %f\n",data.avg_i, data.avg_q);
       printf("avg amp : %f, %f\n\n",data.cw_i, data.cw_q);
 
-      //if(tag_id == PREDEFINED_RN16_)
-      if(true)
+      if(tag_id == PREDEFINED_RN16_)
+      //if(true)
       {
         BWtrainer->getRespond(data);
         if(tag_id == PREDEFINED_RN16_)
         {
-          data_stack.push_back(data);
-          weight_stack.push_back(curWeightVector);
+          weight_amp_stack.push_back(phase_amp_dataset(curWeightVector, data));
+          //data_stack.push_back(data);
+          //weight_stack.push_back(curWeightVector);
         }
       }
       else
@@ -412,14 +416,24 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
       needSIC = true;
     }else if(status == BEAMFORMING)
     {
-      if(perfect_flag)
+      if(opt_repeat_counter < (REPEAT_COUNT_-1))
       {
-        weightVector = perfectVector;
+        opt_repeat_counter += 1;
         needSIC = false;
       }else
-      {
-        weightVector = BWtrainer->getOptimalPhaseVector();
-        needSIC = true;
+      {      
+        if(perfect_flag)
+        {
+          weightVector = perfectVector_l[perfect_i];
+          perfect_i = (perfect_i+1)%6;
+          //needSIC = false;
+          needSIC = true;
+        }else
+        {
+          weightVector = BWtrainer->getOptimalPhaseVector();
+          needSIC = true;
+        }
+        opt_repeat_counter = 0;
       }
     }
   }else //switch status triggered
@@ -439,26 +453,52 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
       if(data.round >= THRESHOLD_FOR_PERFECT_)
       {
         /***************** Perfect training phase start ******************/
-        if(perfect_flag || data_stack.size() >= 50)
+        if(perfect_flag || weight_amp_stack.size() >= 50)
         {
-          std::cout <<weight_stack.size() << std::endl;
-          if(perfectVector.size() == 0)
+          std::cout <<weight_amp_stack.size() << std::endl;
+          if(perfectVector_l[0].size() == 0)
           {
-            CA_calculator ca_cal(ant_amount-1, (int)data_stack.size()/(ant_amount-1));
+            std::vector<int> idx_cont(weight_amp_stack.size());
 
-            for(int i = 0; i < data_stack.size(); i++)
+            for(int i = 0; i < idx_cont.size(); i++)
+              idx_cont[i] = i;
+
+            std::random_shuffle(idx_cont.begin(), idx_cont.end());
+
+            CA_calculator ca_cal(ant_amount-1);
+
+            for(int i = 0; i < weight_amp_stack.size(); i++)
             {
-              ca_cal.setNewTrainingVector(weight_stack[i]);
-              ca_cal.setNewCorrData(std::complex<double>(data_stack[i].avg_i, data_stack[i].avg_q));
+              if(i==10)
+              {
+                perfectVector_l[0] = ca_cal.processOptimalVector();
+              }else if(i==20)
+              {
+                perfectVector_l[1] = ca_cal.processOptimalVector();
+              }else if(i==30)
+              {
+                perfectVector_l[2] = ca_cal.processOptimalVector();
+              }else if(i==40)
+              {
+                perfectVector_l[3] = ca_cal.processOptimalVector();
+              }else if(i==50)
+              {
+                perfectVector_l[4] = ca_cal.processOptimalVector();
+              }
+              //ca_cal.setNewData(weight_stack[idx_cont[i]], std::complex<double>(data_stack[idx_cont[i]].avg_i, data_stack[idx_cont[i]].avg_q));
+              ca_cal.setNewData(weight_amp_stack[idx_cont[i]].phase, weight_amp_stack[idx_cont[i]].amp);
+              //ca_cal.setNewTrainingVector(weight_stack[i]);
+              //ca_cal.setNewCorrData(std::complex<double>(data_stack[i].avg_i, data_stack[i].avg_q));
             }
-            perfectVector = ca_cal.processOptimalVector();
+            perfectVector_l[5] = ca_cal.processOptimalVector();
             perfect_flag = true;
 
           }
           status = BEAMFORMING;
           status_count = 0xFFFF;  //write max
           sic_ctrl->setTargetPower(std::complex<float>(0.01, 0.0));
-          weightVector = perfectVector;
+          weightVector = perfectVector_l[0];
+          perfect_i = 0;
         }else
         {
           /***************** Not enough training data ******************/
@@ -479,6 +519,7 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
           status_count = BEAMFORMING_ROUND;
           sic_ctrl->setTargetPower(std::complex<float>(0.01, 0.0));
           weightVector = BWtrainer->getOptimalPhaseVector();
+          opt_repeat_counter = 0;
         }else
         {
           /***************** Back to Training stage ******************/
@@ -492,7 +533,8 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
     }
   }
 
-  vector2cur_weights(weightVector);
+  if(weightVector.size() != 0)
+    vector2cur_weights(weightVector);
 
   if(weights_apply(cur_weights)){
     std::cerr<<"weight apply failed"<<std::endl;
@@ -587,4 +629,14 @@ int Beamformer::dataLogging(const struct average_corr_data & data, double sic_po
 
 
   return 0;
+}
+
+Beamformer::phase_amp_dataset::phase_amp_dataset(std::vector<int> phase_, average_corr_data data_)
+  : phase(phase_), amp(data_.avg_i, data_.avg_q)
+{
+}
+
+Beamformer::phase_amp_dataset::phase_amp_dataset(std::vector<int> phase_, std::complex<float> amp_)
+  : phase(phase_), amp(amp_)
+{
 }
