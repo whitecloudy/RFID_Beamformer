@@ -61,9 +61,14 @@ class Agent_beamtrainer : public Directional_beamtrainer{
     int round_count;
     int round_max;
 
-    bool beamSearchFlag = true;
+    int receive_count = 0;
 
-    Agent_communicator comm6, comm8, comm10, comm12;
+    bool beamSearchFlag = true;
+  
+    double best_amp = 0.0;
+    std::vector<int> best_vector;
+
+    //Agent_communicator comm6, comm8, comm10, comm12;
 
     struct beamStruct
     {

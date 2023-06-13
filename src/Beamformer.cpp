@@ -388,12 +388,7 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
       //if(true)
       {
         BWtrainer->getRespond(data);
-        if(tag_id == PREDEFINED_RN16_)
-        {
-          weight_amp_stack.push_back(phase_amp_dataset(curWeightVector, data));
-          //data_stack.push_back(data);
-          //weight_stack.push_back(curWeightVector);
-        }
+        weight_amp_stack.push_back(phase_amp_dataset(curWeightVector, data));
       }
       else
       {
@@ -424,8 +419,8 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
       {      
         if(perfect_flag)
         {
-          weightVector = perfectVector_l[perfect_i];
           perfect_i = (perfect_i+1)%6;
+          weightVector = perfectVector_l[perfect_i];
           //needSIC = false;
           needSIC = true;
         }else
@@ -498,6 +493,7 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
           status_count = 0xFFFF;  //write max
           sic_ctrl->setTargetPower(std::complex<float>(0.01, 0.0));
           weightVector = perfectVector_l[0];
+          opt_repeat_counter = 0;
           perfect_i = 0;
         }else
         {
@@ -556,7 +552,6 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
 
 int Beamformer::dataLogging(const struct average_corr_data & data, double sic_power, bool optimal, const int which_op){
   uint32_t tag_id = 0;
-
 
   if(data.successFlag == _SUCCESS){
     if(data.data_flag == 0) //RN16
@@ -625,8 +620,6 @@ int Beamformer::dataLogging(const struct average_corr_data & data, double sic_po
     }
 
   }
-
-
 
   return 0;
 }
