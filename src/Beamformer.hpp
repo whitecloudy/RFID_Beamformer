@@ -10,11 +10,11 @@
 #include "lib/Reader_comm/IPC_controller.hpp"
 #include "global/struct_global.hpp"
 #include "Beam_algo/common/CA_calculator.hpp"
+#include "Logger.hpp"
 #include <iostream>
 #include <string>
 #include <cstdio>
 #include <thread>
-#include <fstream>
 #include <memory>
 
 #define BEAMFORMING_ROUND (40)
@@ -48,9 +48,10 @@ class Beamformer{
     std::unique_ptr<Phase_Attenuator_controller> phase_ctrl;
     std::unique_ptr<SIC_controller> sic_ctrl;
     std::unique_ptr<Beamtrainer> BWtrainer;
+
+    Logger logger;
     
     IPC_controller ipc;
-    std::ofstream log, optimal_log;
     bool sic_enabled = false;
     int ant_amount;   //TODO : this is actually not nessesary.... need to be depricated
     std::vector<int> ant_nums;
@@ -91,7 +92,6 @@ class Beamformer{
     int SIC_handler(const struct average_corr_data &);
     int SIC_adjustment(void);
     int Signal_handler(const struct average_corr_data &);
-    int dataLogging(const struct average_corr_data &, double sic_power, bool optimal=false, const int which_op = 0);
 
   public:
     Beamformer(std::vector<int> ant_nums, BEAM_ALGO::algorithm beam_algo, int sic_ant_num, std::vector<int> ant_array, int k);

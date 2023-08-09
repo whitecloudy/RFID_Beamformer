@@ -5,10 +5,11 @@ project(Beamforming)
 add_subdirectory(Beam_algo)
 add_subdirectory(Calibrator)
 
-
 list(APPEND BEAMFORMER_SOURCES
   Beamformer.cpp
   Beamformer.hpp
+  Logger.cpp
+  Logger.hpp
   )
 
 list(APPEND BEAMFORMER_LINKS

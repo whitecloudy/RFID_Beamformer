@@ -182,7 +182,7 @@ int Beamformer::run_beamformer(void){
 
 
 
-Beamformer::Beamformer(std::vector<int> ant_nums_p, BEAM_ALGO::algorithm beam_algo, int sic_ant_num, std::vector<int> ant_array, int k)
+Beamformer::Beamformer(std::vector<int> ant_nums_p, BEAM_ALGO::algorithm beam_algo, int sic_ant_num, std::vector<int> ant_array, int k) : logger(ant_nums_p)
 {
   this->phase_ctrl = std::unique_ptr<Phase_Attenuator_controller>(new Phase_Attenuator_controller(0));
   this->ant_nums = ant_nums_p;
@@ -192,22 +192,10 @@ Beamformer::Beamformer(std::vector<int> ant_nums_p, BEAM_ALGO::algorithm beam_al
 
   this->BWtrainer->printClassName();
 
-
   if(sic_ant_num != -1){
     sic_enabled = true;
     this->ant_nums.push_back(sic_ant_num); //TODO : SIC antenna shall be handled seperately
   }
-
-  log.open("log.csv");
-  optimal_log.open("log_optimal.csv");
-
-  for(int i = 0; i<ant_amount; i++){
-    log<<"phase "<<ant_nums[i]<<", ";
-    optimal_log<<"phase "<<ant_nums[i]<<", ";
-  }
-
-  log<<"SIC phase, SIC power, avg corr,corr i, corr q, cw i, cw q,std i,std q ,RN16, round"<<std::endl;
-  optimal_log<<"SIC phase, SIC power, avg corr,corr i, corr q, cw i, cw q,std i,std q ,RN16, round"<<std::endl;
 
   this->ant_amount++;
 }
@@ -215,7 +203,6 @@ Beamformer::Beamformer(std::vector<int> ant_nums_p, BEAM_ALGO::algorithm beam_al
 
 
 Beamformer::~Beamformer(){
-  log.close();
 }
 
 int Beamformer::init_beamformer(void){
@@ -357,9 +344,9 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
 
   /*************************Add algorithm here***************************/
   if(perfect_flag)
-    dataLogging(data, sic_ctrl->getPower(),  true, 90+perfect_i);
+    logger.dataLogging(cur_weights, data, sic_ctrl->getPower(), counter, beamforming_count, true, 90+perfect_i);
   else
-    dataLogging(data, sic_ctrl->getPower(),  BWtrainer->isOptimalUsed(), BWtrainer->which_optimal());
+    logger.dataLogging(cur_weights, data, sic_ctrl->getPower(), counter, beamforming_count, BWtrainer->isOptimalUsed(), BWtrainer->which_optimal());
 
   counter++;
 
@@ -548,81 +535,6 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
   return 0;
 }
 
-
-
-int Beamformer::dataLogging(const struct average_corr_data & data, double sic_power, bool optimal, const int which_op){
-  uint32_t tag_id = 0;
-
-  if(data.successFlag == _SUCCESS){
-    if(data.data_flag == 0) //RN16
-    {
-      for(int i = 0; i<16; i++)
-      {
-        tag_id = tag_id << 1;
-        tag_id += data.data_bits[i];
-      }
-    }else if(data.data_flag == 1) //EPC 128bit
-    {
-      for(int i = 0; i<32; i++)
-      {
-        tag_id = tag_id << 1;
-        tag_id += data.data_bits[i];
-      }
-    }
-    else
-    {
-      std::cerr << "Wrong data flag"<<std::endl;
-      std::cerr << (unsigned int)data.data_flag << std::endl;
-      assert(data.data_flag == 0);
-    }
-
-    if(optimal)
-    {
-      for(int i = 0; i<ant_amount;i++){
-        optimal_log<<cur_weights[ant_nums[i]]<<", ";
-      }
-      optimal_log<<sic_power<< ", "<<data.avg_corr<<", "<<data.avg_i<<", "<<data.avg_q<<", "<<data.cw_i<<", "<<data.cw_q<<", "<<data.stddev_i<<", "<<data.stddev_q<<", "<<tag_id<<", "<<data.round<< ", "<<which_op<<", " <<counter << ", " <<beamforming_count<<std::endl;
-    }else
-    {
-      for(int i = 0; i<ant_amount;i++){
-        log<<cur_weights[ant_nums[i]]<<", ";
-      }
-
-      log<<sic_power<< ", "<<data.avg_corr<<", "<<data.avg_i<<", "<<data.avg_q<<", "<<data.cw_i<<", "<<data.cw_q<<", "<<data.stddev_i<<", "<<data.stddev_q<<", "<<tag_id<<", "<<data.round<<", "<<counter<< ", " << beamforming_count<<std::endl;
-    }
-  }else if(data.successFlag == _PREAMBLE_FAIL){
-    if(optimal)
-    {
-      for(int i = 0; i<ant_amount;i++){
-        optimal_log<<cur_weights[ant_nums[i]]<<", ";
-      }
-      optimal_log<<sic_power<< ", "<<0.0<<", "<<0.0<<", "<<0.0<<","<<data.cw_i<<", "<<data.cw_q<<", "<<data.stddev_i<<", "<<data.stddev_q<<", "<<"-"<<","<<data.round<<", "<<which_op<<", "<<counter<< ", " << beamforming_count<<std::endl;
-    }else
-    {
-      for(int i = 0; i<ant_amount;i++){
-        log<<cur_weights[ant_nums[i]]<<", ";
-      }
-      log<<sic_power<< ", "<<0.0<<", "<<0.0<<", "<<0.0<<","<<data.cw_i<<", "<<data.cw_q<<", "<<data.stddev_i<<", "<<data.stddev_q<<", "<<"-"<<","<<data.round<<", "<<counter<< ", " << beamforming_count<<std::endl;
-    }
-  }else if(data.successFlag == _GATE_FAIL){
-    if(optimal)
-    {
-      for(int i = 0; i<ant_amount;i++){
-        optimal_log<<cur_weights[ant_nums[i]]<<", ";
-      }
-      optimal_log<<sic_power<< ", "<<0.0<<", "<<0.0<<", "<<0.0<<","<<data.cw_i<<", "<<data.cw_q<<", "<<data.stddev_i<<", "<<data.stddev_q<<", "<<"GATE Failed"<<","<<data.round<<", "<<counter<<std::endl;
-    }else
-    {
-      for(int i = 0; i<ant_amount;i++){
-        log<<cur_weights[ant_nums[i]]<<", ";
-      }
-      log<<sic_power<< ", "<<0.0<<", "<<0.0<<", "<<0.0<<","<<data.cw_i<<", "<<data.cw_q<<", "<<data.stddev_i<<", "<<data.stddev_q<<", "<<"GATE Failed"<<","<<data.round<<std::endl;
-    }
-
-  }
-
-  return 0;
-}
 
 Beamformer::phase_amp_dataset::phase_amp_dataset(std::vector<int> phase_, average_corr_data data_)
   : phase(phase_), amp(data_.avg_i, data_.avg_q)
