@@ -2,6 +2,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <ctime>
+#include <cassert>
 
 #define __SCRAMBLE_VAR      (30)
 
@@ -66,8 +67,9 @@ std::vector<int> recv_data_converter(std::vector<std::complex<float>> data)
   for(int i = 0; i<6; i++)
   {
     phaseVector[i] = beam_util::complex2Phase(std::conj(data[i]));
+    // std::cout << phaseVector[i] << " ";
   }
-  std::cout << "\n";
+  // std::cout << "\n";
 
   return phaseVector;
 }
@@ -133,12 +135,12 @@ std::vector<std::complex<float>> Agent_communicator::recv_data(void)
     if(n != 0)
       break;
   }
-  std::cout << (int)(buf[n-1]) << std::endl;
+  // std::cout << (int)(buf[n-1]) << std::endl;
   buf[n] = '\0';
 
-  std::string recv_data(buf);
+  std::string recv_str(buf);
 
-  std::cout << recv_data << std::endl;
+  std::cout << recv_str << std::endl;
 
   int s = 0;
   int length = 0;
@@ -147,12 +149,12 @@ std::vector<std::complex<float>> Agent_communicator::recv_data(void)
 
   std::vector<std::complex<float>> result_v;
 
-  for(int i = 0; i<n; i++)
+  for(int i = 0; i<n+1; i++)
   {
-    if(recv_data[i] == ',')
+    if(recv_str[i] == ',' || recv_str[i] == '\0')
     {
       length = i-s;
-      float data = stof(recv_data.substr(s, length));
+      float data = stof(recv_str.substr(s, length));
       s = i+1;
 
       if(is_real)
@@ -167,6 +169,9 @@ std::vector<std::complex<float>> Agent_communicator::recv_data(void)
       }
     }
   }
+  // assert(!is_real);
+
+  // result_v.push_back(std::complex<float>(real, imag));
 
   return result_v;
 }
@@ -207,13 +212,12 @@ std::vector<int> Agent_communicator::get_dir_opt(void)
 }
 
 
-Agent_beamtrainer::Agent_beamtrainer(int ant_num, std::vector<int> ant_array, int actual_round, int round_max) : Directional_beamtrainer(ant_num, ant_array), curCenterPhaseVector(ant_num)//, comm6(6, 11045), comm8(8, 11047), comm10(10, 11049), comm12(12, 11051)
+Agent_beamtrainer::Agent_beamtrainer(int ant_num, std::vector<int> ant_array, int actual_round, int round_max) : Directional_beamtrainer(ant_num, ant_array), curCenterPhaseVector(ant_num), comm6(6, 11045), comm8(8, 11047), comm10(10, 11049), comm12(12, 11051)
 {
   this->round_max = round_max;
   this->best_beam_max = 3;
 
-  // opt_number = 14;
-  opt_number = 2;
+  opt_number = 17;
   optimalPhaseVector.resize(opt_number);
 }
 
@@ -238,25 +242,18 @@ void Agent_beamtrainer::reset_Agent_beamtrainer(void)
 {
   reset_Directional_beamtrainer();
 
-  
-
   round_count = 0;
   best_beam_count = 0;
 
-  // comm6.reset();
-  // comm8.reset();
-  // comm10.reset();
-  // comm12.reset();
+  comm6.reset();
+  comm8.reset();
+  comm10.reset();
+  comm12.reset();
 
   rankBeamL.clear();
   bestBeamNum.clear();
 
   curCenterPhaseVector.clear();
-
-  receive_count = 0;
-
-  best_amp = 0.0;
-  best_vector.clear();
 
   beamSearchFlag = true;
 }
@@ -312,43 +309,38 @@ const std::vector<int> Agent_beamtrainer::getRespond(struct average_corr_data re
     }
   }else
   {
-    if(!optimal_used && !optimal_available)
+    if(!optimal_used)
     {
-      receive_count++;
-      if(best_amp < recvData.avg_corr)
-      {
-        best_vector = usedVector;
-      }
-      // comm6.send_data(usedVector, recvData.avg_i, recvData.avg_q, recvData.stddev_i, recvData.stddev_q);
-      // comm8.send_data(usedVector, recvData.avg_i, recvData.avg_q, recvData.stddev_i, recvData.stddev_q);
-      // comm10.send_data(usedVector, recvData.avg_i, recvData.avg_q, recvData.stddev_i, recvData.stddev_q);
-      // comm12.send_data(usedVector, recvData.avg_i, recvData.avg_q, recvData.stddev_i, recvData.stddev_q);
+      comm6.send_data(usedVector, recvData.avg_i, recvData.avg_q, recvData.stddev_i, recvData.stddev_q);
+      comm8.send_data(usedVector, recvData.avg_i, recvData.avg_q, recvData.stddev_i, recvData.stddev_q);
+      comm10.send_data(usedVector, recvData.avg_i, recvData.avg_q, recvData.stddev_i, recvData.stddev_q);
+      comm12.send_data(usedVector, recvData.avg_i, recvData.avg_q, recvData.stddev_i, recvData.stddev_q);
     }
 
-    // if((comm6.is_opt_ready() && comm8.is_opt_ready() && comm10.is_opt_ready() && comm12.is_opt_ready()) && !optimal_used)
-    if((receive_count >= 6) && !optimal_available && !optimal_used)
+    if((comm6.is_opt_ready() && comm8.is_opt_ready() && comm10.is_opt_ready() && comm12.is_opt_ready()) && !optimal_used)
     {
-      // optimalPhaseVector[0] = comm6.get_nn_opt();
-      // optimalPhaseVector[1] = comm6.get_heur_opt();
-      // optimalPhaseVector[2] = comm6.get_mmse_opt();
-      // optimalPhaseVector[3] = comm8.get_nn_opt();
-      // optimalPhaseVector[4] = comm8.get_heur_opt();
-      // optimalPhaseVector[5] = comm8.get_mmse_opt();
-      // optimalPhaseVector[6] = comm10.get_nn_opt();
-      // optimalPhaseVector[7] = comm10.get_heur_opt();
-      // optimalPhaseVector[8] = comm10.get_mmse_opt();
-      // optimalPhaseVector[9] = comm12.get_nn_opt();
-      // optimalPhaseVector[10] = comm12.get_heur_opt();
-      // optimalPhaseVector[11] = comm12.get_mmse_opt();
-      // optimalPhaseVector[12] = comm12.get_dir_opt();
-      optimalPhaseVector[0] = best_vector;
-      optimalPhaseVector[1] = beamNum2phaseVec(bestBeamNum[0]);
+      optimalPhaseVector[0] = comm6.get_nn_opt();
+      optimalPhaseVector[1] = comm6.get_heur_opt();
+      optimalPhaseVector[2] = comm6.get_mmse_opt();
+      optimalPhaseVector[3] = comm6.get_dir_opt();
+      optimalPhaseVector[4] = comm8.get_nn_opt();
+      optimalPhaseVector[5] = comm8.get_heur_opt();
+      optimalPhaseVector[6] = comm8.get_mmse_opt();
+      optimalPhaseVector[7] = comm8.get_dir_opt();
+      optimalPhaseVector[8] = comm10.get_nn_opt();
+      optimalPhaseVector[9] = comm10.get_heur_opt();
+      optimalPhaseVector[10] = comm10.get_mmse_opt();
+      optimalPhaseVector[11] = comm10.get_dir_opt();
+      optimalPhaseVector[12] = comm12.get_nn_opt();
+      optimalPhaseVector[13] = comm12.get_heur_opt();
+      optimalPhaseVector[14] = comm12.get_mmse_opt();
+      optimalPhaseVector[15] = comm12.get_dir_opt();
+      optimalPhaseVector[16] = beamNum2phaseVec(bestBeamNum[0]);
 
       // comm6.reset();
       // comm8.reset();
       // comm10.reset();
       // comm12.reset();
-
 
       optimal_available = true;
     }

@@ -16,7 +16,7 @@
 
 #define SIC_PORT_NUM_ ant_nums[ant_amount-1]
 
-#define REPEAT_COUNT_ (10)
+#define REPEAT_COUNT_ (1)
 
 
 double normal_random(double mean, double std_dev){
@@ -344,7 +344,7 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
 
   /*************************Add algorithm here***************************/
   if(perfect_flag)
-    logger.dataLogging(cur_weights, data, sic_ctrl->getPower(), counter, beamforming_count, true, 90+perfect_i);
+    logger.dataLogging(cur_weights, data, sic_ctrl->getPower(), counter, beamforming_count, true, 99);
   else
     logger.dataLogging(cur_weights, data, sic_ctrl->getPower(), counter, beamforming_count, BWtrainer->isOptimalUsed(), BWtrainer->which_optimal());
 
@@ -371,8 +371,8 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
       printf("avg iq : %f, %f\n",data.avg_i, data.avg_q);
       printf("avg amp : %f, %f\n\n",data.cw_i, data.cw_q);
 
-      if(tag_id == PREDEFINED_RN16_)
-      //if(true)
+      //if(tag_id == PREDEFINED_RN16_)
+      if(true)
       {
         BWtrainer->getRespond(data);
         weight_amp_stack.push_back(phase_amp_dataset(curWeightVector, data));
@@ -406,10 +406,9 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
       {      
         if(perfect_flag)
         {
-          perfect_i = (perfect_i+1)%6;
-          weightVector = perfectVector_l[perfect_i];
-          //needSIC = false;
-          needSIC = true;
+          weightVector = perfectVector;
+          needSIC = false;
+          //needSIC = true;
         }else
         {
           weightVector = BWtrainer->getOptimalPhaseVector();
@@ -437,8 +436,7 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
         /***************** Perfect training phase start ******************/
         if(perfect_flag || weight_amp_stack.size() >= 50)
         {
-          std::cout <<weight_amp_stack.size() << std::endl;
-          if(perfectVector_l[0].size() == 0)
+          if(perfectVector.size() == 0)
           {
             std::vector<int> idx_cont(weight_amp_stack.size());
 
@@ -451,37 +449,16 @@ int Beamformer::Signal_handler(const struct average_corr_data & data){
 
             for(int i = 0; i < weight_amp_stack.size(); i++)
             {
-              if(i==10)
-              {
-                perfectVector_l[0] = ca_cal.processOptimalVector();
-              }else if(i==20)
-              {
-                perfectVector_l[1] = ca_cal.processOptimalVector();
-              }else if(i==30)
-              {
-                perfectVector_l[2] = ca_cal.processOptimalVector();
-              }else if(i==40)
-              {
-                perfectVector_l[3] = ca_cal.processOptimalVector();
-              }else if(i==50)
-              {
-                perfectVector_l[4] = ca_cal.processOptimalVector();
-              }
-              //ca_cal.setNewData(weight_stack[idx_cont[i]], std::complex<double>(data_stack[idx_cont[i]].avg_i, data_stack[idx_cont[i]].avg_q));
               ca_cal.setNewData(weight_amp_stack[idx_cont[i]].phase, weight_amp_stack[idx_cont[i]].amp);
-              //ca_cal.setNewTrainingVector(weight_stack[i]);
-              //ca_cal.setNewCorrData(std::complex<double>(data_stack[i].avg_i, data_stack[i].avg_q));
             }
-            perfectVector_l[5] = ca_cal.processOptimalVector();
+            perfectVector = ca_cal.processOptimalVector();
             perfect_flag = true;
 
           }
           status = BEAMFORMING;
           status_count = 0xFFFF;  //write max
           sic_ctrl->setTargetPower(std::complex<float>(0.01, 0.0));
-          weightVector = perfectVector_l[0];
-          opt_repeat_counter = 0;
-          perfect_i = 0;
+          weightVector = perfectVector;
         }else
         {
           /***************** Not enough training data ******************/

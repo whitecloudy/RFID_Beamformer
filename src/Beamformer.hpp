@@ -17,7 +17,7 @@
 #include <thread>
 #include <memory>
 
-#define BEAMFORMING_ROUND (40)
+#define BEAMFORMING_ROUND (85)
 #define SIC_ADJUST_THRESHOLD (3)
 
 class Beamformer{
@@ -62,8 +62,7 @@ class Beamformer{
 
     bool perfect_flag = false;
 
-    int perfect_i = 0;
-    std::vector<int> perfectVector_l[6];
+    std::vector<int> perfectVector;
     std::vector<int> curWeightVector;
     //std::vector<std::vector<int>> weight_stack;
     //std::vector<average_corr_data> data_stack;
